@@ -1,8 +1,7 @@
 % analyze fEPSP area during induction
-clear all; close all; clc
+clear all; close all;clc
 
 %% file paths and directories
-% fpath = 'D:\Google Drive\Work\Research Projects\Theta LTP\Processed Matlab Data\';
 fpath = 'D:\Google Drive\Work\Research Projects\Theta LTP\Processed Matlab Data\';
 direct = dir(strcat(fpath,'*.mat*')); % processed matlab files
 
