@@ -192,7 +192,7 @@ for d = 1:length(position)
 end
 
 %% figures
-burst_plot = 1; % which burst to plot
+burst_plot = 3; % which burst to plot
 for d = 1:length(position)
     figure;hold on
     for a = 1:length(induction)
@@ -201,8 +201,8 @@ for d = 1:length(position)
                 for e = 1:length(drug)
                     if isempty(slices{a,b,c,d,e}) == 0
                         plot(squeeze(mean(indFilt1{a,b,c,d,e}(:,burst_plot,:),3)),'Color',stimcolor{b},'LineWidth',2)
-                        plot(squeeze(mean(indFilt1{a,b,c,d,e}(:,burst_plot,:),3)) + squeeze(std(indFilt1{a,b,c,d,e}(:,burst_plot,:),0,3)/sqrt(size(indFilt1{a,b,c,d,e},3))),'Color',stimcolor_shade{b})
-                        plot(squeeze(mean(indFilt1{a,b,c,d,e}(:,burst_plot,:),3)) - squeeze(std(indFilt1{a,b,c,d,e}(:,burst_plot,:),0,3)/sqrt(size(indFilt1{a,b,c,d,e},3))),'Color',stimcolor_shade{b})
+%                         plot(squeeze(mean(indFilt1{a,b,c,d,e}(:,burst_plot,:),3)) + squeeze(std(indFilt1{a,b,c,d,e}(:,burst_plot,:),0,3)/sqrt(size(indFilt1{a,b,c,d,e},3))),'Color',stimcolor_shade{b})
+%                         plot(squeeze(mean(indFilt1{a,b,c,d,e}(:,burst_plot,:),3)) - squeeze(std(indFilt1{a,b,c,d,e}(:,burst_plot,:),0,3)/sqrt(size(indFilt1{a,b,c,d,e},3))),'Color',stimcolor_shade{b})
                     end
                 end
             end
