@@ -178,6 +178,15 @@ for d = 1:length(position)
                         % Average burst area
                         burstAreaNmean{a,b,c,d,e} = mean(burstAreaN{a,b,c,d,e},1);
                         
+                        % load data into a single matrix for
+                        % regression/correlation
+                        X = [X;d*ones(length(slopesEnd{a,b,c,d,e}),1),...
+                                b*ones(length(slopesEnd{a,b,c,d,e}),1),...
+                                burstAreaNmean{a,b,c,d,e}',heights{a,b,c,d,e}',...
+                                slopesEnd{a,b,c,d,e}'];
+                        
+
+                        
                         %% figures
                         figure(d)
                         plot(burstAreaNmean{a,b,c,d,e},slopesEnd{a,b,c,d,e},'.','Color',stimcolor{b},'MarkerSize',15)
@@ -189,6 +198,9 @@ for d = 1:length(position)
             end
         end
     end
+    % correlation for each recording location
+    loc_ind = X(:,1) == d;
+    [R{d},P{d}] = corrcoef(X(loc_ind,[3,5]));
 end
 
 %% figures
@@ -209,5 +221,5 @@ for d = 1:length(position)
         end
     end
 end
-save('D:\Google Drive\Work\Research Projects\Theta LTP\Processed Variables\fepspArea.mat',...
+save('D:\Google Drive\Work\Research Projects\Theta LTP\Processed Variables\Analysis\fepspArea.mat',...
     'indFilt1','indFilt2','burstAreaN','burstAreaNmean','slopesEnd','heights','dates','hemis')
