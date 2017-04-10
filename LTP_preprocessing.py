@@ -48,6 +48,10 @@ stim_loc = ['apical','basal','perforant']
 stim_dcs = ['control','cathodal','anodal']
 drug = ['none']
 
+# baseline recording period (minutes)
+baset_pre = 20
+baset_post = 60
+
 # organization of comments
 com_columns= ['channel','block','sample','unknown','comment number']
 
@@ -60,6 +64,9 @@ ind_block = np.empty([4,1],dtype=int)
 for slice in dir_new:
     # load matlab file
     matfile = sio.loadmat(fpath_r+slice)
+    
+    # date
+    date = slice[0:8]
     
     # sampling rate
     fs = stats.mode(matfile['samplerate'],axis=None).mode
@@ -118,6 +125,19 @@ for slice in dir_new:
             hemiI = comment.index('hemi_')
             hemiL = len('hemi_')
             hemi = comment[hemiI+hemiL:hemiI+hemiL+1]   
+    
+    # bipolar pulse paramters
+    pulse_date = 20161013 # changed timing of bipolar pulse after this date
+    if date>= pulse_date:
+        pulse_t = 0.5*fs
+    else:
+        pulse_t = 0
+        
+    # baseline index
+    base_idx_pre = np.arange(ind_block[0]-baset_pre,ind_block[0])
+    base_idx_post = np.arange(ind_block[0]+1,ind_block[0]+baset_post+1)
+    base_idx = np.concatenate((base_idx_pre,base_idx_post),0)
+        
                 
             
         
