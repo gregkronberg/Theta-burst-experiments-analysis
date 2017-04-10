@@ -78,10 +78,14 @@ for slice in dir_new:
     # extract experiment info from comments
     #==========================================================================
     # loop over comments
+    chan_soma=0
+    chan_apical=0
+    chan_basal=0
+    chan_perforant=0
     for idx,comment in enumerate(matfile['comtext']):
-        com_chan = matfile['com'][idx,com_columns.index('channel')]
+        com_chan = matfile['com'][idx,com_columns.index('channel')]-1
         com_block = matfile['com'][idx,com_columns.index('block')]        
-
+        
         # recording location
         if 'Soma' in comment:
             chan_soma = com_chan
@@ -137,6 +141,25 @@ for slice in dir_new:
     base_idx_pre = np.arange(ind_block[0]-baset_pre,ind_block[0])
     base_idx_post = np.arange(ind_block[0]+1,ind_block[0]+baset_post+1)
     base_idx = np.concatenate((base_idx_pre,base_idx_post),0)
+    
+    # organize baseline traces into column vectors
+    base_soma = np.empty([stats.mode(l_block,None).mode,matfile['datastart'].shape[1]])
+    base_dend = np.empty([stats.mode(l_block,None).mode,matfile['datastart'].shape[1]])
+    for a in np.arange(0,matfile['datastart'].shape[1],dtype=int): # loop over blocks
+        if l_block[1,a] == stats.mode(l_block,None).mode: # check that it is a baseline block (not induction)
+            if chan_soma != 0: # check for somatic recording 
+                soma_idx = np.arange(matfile['datastart'][chan_soma,a],matfile['dataend'][chan_soma,a],dtype=int)
+                base_soma[:,a] = matfile['data'][:,soma_idx].T
+            if chan_apical !=0:
+                dend_idx = np.arange(matfile['datastart'][chan_apical,a],matfile['dataend'][chan_apical,a],dtype=int)
+                base_dend[:,a] = matfile['data'][:,dend_idx].T
+            elif chan_basal !=0:
+                dend_idx = np.arange(matfile['datastart'][chan_basal,a],matfile['dataend'][chan_basal,a],dtype=int)
+                base_dend[:,a] = matfile['data'][:,dend_idx].T
+            elif chan_perforant !=0:
+                dend_idx = np.arange(matfile['datastart'][chan_perforant,a],matfile['dataend'][chan_perforant-1,a],dtype=int)
+                base_dend[:,a] = matfile['data'][:,dend_idx].T
+        
         
                 
             
