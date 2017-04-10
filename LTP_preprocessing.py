@@ -78,10 +78,10 @@ for slice in dir_new:
     # extract experiment info from comments
     #==========================================================================
     # loop over comments
-    chan_soma=0
-    chan_apical=0
-    chan_basal=0
-    chan_perforant=0
+    chan_soma=-1
+    chan_apical=-1
+    chan_basal=-1
+    chan_perforant=-1
     for idx,comment in enumerate(matfile['comtext']):
         com_chan = matfile['com'][idx,com_columns.index('channel')]-1
         com_block = matfile['com'][idx,com_columns.index('block')]        
@@ -130,6 +130,9 @@ for slice in dir_new:
             hemiL = len('hemi_')
             hemi = comment[hemiI+hemiL:hemiI+hemiL+1]   
     
+    #==============================================================================
+    # organize raw data into arrays
+    #==============================================================================
     # bipolar pulse paramters
     pulse_date = 20161013 # changed timing of bipolar pulse after this date
     if date>= pulse_date:
@@ -143,22 +146,37 @@ for slice in dir_new:
     base_idx = np.concatenate((base_idx_pre,base_idx_post),0)
     
     # organize baseline traces into column vectors
-    base_soma = np.empty([stats.mode(l_block,None).mode,matfile['datastart'].shape[1]])
-    base_dend = np.empty([stats.mode(l_block,None).mode,matfile['datastart'].shape[1]])
-    for a in np.arange(0,matfile['datastart'].shape[1],dtype=int): # loop over blocks
-        if l_block[1,a] == stats.mode(l_block,None).mode: # check that it is a baseline block (not induction)
-            if chan_soma != 0: # check for somatic recording 
-                soma_idx = np.arange(matfile['datastart'][chan_soma,a],matfile['dataend'][chan_soma,a],dtype=int)
-                base_soma[:,a] = matfile['data'][:,soma_idx].T
-            if chan_apical !=0:
-                dend_idx = np.arange(matfile['datastart'][chan_apical,a],matfile['dataend'][chan_apical,a],dtype=int)
-                base_dend[:,a] = matfile['data'][:,dend_idx].T
-            elif chan_basal !=0:
-                dend_idx = np.arange(matfile['datastart'][chan_basal,a],matfile['dataend'][chan_basal,a],dtype=int)
-                base_dend[:,a] = matfile['data'][:,dend_idx].T
-            elif chan_perforant !=0:
-                dend_idx = np.arange(matfile['datastart'][chan_perforant,a],matfile['dataend'][chan_perforant-1,a],dtype=int)
-                base_dend[:,a] = matfile['data'][:,dend_idx].T
+    # preallocate
+    base_soma = np.empty([int(stats.mode(l_block,None).mode),matfile['datastart'].shape[1]])
+    base_dend = np.empty([int(stats.mode(l_block,None).mode),matfile['datastart'].shape[1]])
+    
+    # loop over blocks
+    for a in np.arange(0,matfile['datastart'].shape[1],dtype=int): 
+        
+        # check that it is a baseline block (not induction)
+        if l_block[1,a] == stats.mode(l_block,None).mode: 
+            
+            # check for somatic recording 
+            if chan_soma != -1: 
+                # indeces for each block 
+                soma_idx = np.arange(matfile['datastart'][int(chan_soma),a],
+                                     matfile['dataend'][int(chan_soma),a],dtype=int)
+                # store each block as a column
+                base_soma[:,a] = matfile['data'][:,soma_idx].T.reshape(-1)
+            
+            # repeat for dendritic recordings
+            if chan_apical !=-1:
+                dend_idx = np.arange(matfile['datastart'][chan_apical,a],
+                                     matfile['dataend'][chan_apical,a],dtype=int)
+                base_dend[:,a] = matfile['data'][:,dend_idx].T.reshape(-1)
+            elif chan_basal !=-1:
+                dend_idx = np.arange(matfile['datastart'][chan_basal,a],
+                                     matfile['dataend'][chan_basal,a],dtype=int)
+                base_dend[:,a] = matfile['data'][:,dend_idx].T.reshape(-1)
+            elif chan_perforant !=-1:
+                dend_idx = np.arange(matfile['datastart'][int(chan_perforant),a],
+                                     matfile['dataend'][int(chan_perforant),a],dtype=int)
+                base_dend[:,a] = matfile['data'][:,dend_idx].T.reshape(-1)
         
         
                 
