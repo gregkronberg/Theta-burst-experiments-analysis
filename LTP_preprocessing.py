@@ -177,6 +177,13 @@ for slice in dir_new:
                 dend_idx = np.arange(matfile['datastart'][int(chan_perforant),a],
                                      matfile['dataend'][int(chan_perforant),a],dtype=int)
                 base_dend[:,a] = matfile['data'][:,dend_idx].T.reshape(-1)
+    
+    # fill in gaps in recording
+    if base_dend.shape[1]<max(base_idx):
+        base_dend = np.concatenate((base_dend,base_dend[:,-1].reshape(-1,1)),axis=1)
+    if base_soma.shape[1]<max(base_idx):
+        base_soma = np.concatenate((base_soma,base_soma[:,-1].reshape(-1,1)),axis=1)
+        
         
         
                 
