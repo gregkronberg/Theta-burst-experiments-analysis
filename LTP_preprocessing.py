@@ -179,10 +179,16 @@ for slice in dir_new:
                 base_dend[:,a] = matfile['data'][:,dend_idx].T.reshape(-1)
     
     # fill in gaps in recording
+    # check for mismatch between number of recorded blocks and expected number
     if base_dend.shape[1]<max(base_idx):
+        # repeat last block to fill gap
         base_dend = np.concatenate((base_dend,base_dend[:,-1].reshape(-1,1)),axis=1)
     if base_soma.shape[1]<max(base_idx):
         base_soma = np.concatenate((base_soma,base_soma[:,-1].reshape(-1,1)),axis=1)
+        
+    #==============================================================================
+    # take slopes of baseline traces     
+    #==============================================================================
         
         
         
