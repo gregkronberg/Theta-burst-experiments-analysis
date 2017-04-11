@@ -137,26 +137,18 @@ for slice in dir_new:
         if l_block[1,a] == stats.mode(l_block,None).mode: 
             
             # check for somatic recording 
-            if chan_soma != -1: 
-                # indeces for each block 
-                soma_idx = np.arange(matfile['datastart'][int(chan_soma),a],
-                                     matfile['dataend'][int(chan_soma),a],dtype=int)
-                # store each block as a column
-                base_soma[:,a] = matfile['data'][:,soma_idx].T.reshape(-1)
-            
-            # repeat for dendritic recordings
-            if chan_apical !=-1:
-                dend_idx = np.arange(matfile['datastart'][chan_apical,a],
-                                     matfile['dataend'][chan_apical,a],dtype=int)
-                base_dend[:,a] = matfile['data'][:,dend_idx].T.reshape(-1)
-            elif chan_basal !=-1:
-                dend_idx = np.arange(matfile['datastart'][chan_basal,a],
-                                     matfile['dataend'][chan_basal,a],dtype=int)
-                base_dend[:,a] = matfile['data'][:,dend_idx].T.reshape(-1)
-            elif chan_perforant !=-1:
-                dend_idx = np.arange(matfile['datastart'][int(chan_perforant),a],
-                                     matfile['dataend'][int(chan_perforant),a],dtype=int)
-                base_dend[:,a] = matfile['data'][:,dend_idx].T.reshape(-1)
+            for idx,loc in enumerate(rec_loc):
+                if loc == 'Soma':
+                    if loc_chan[idx] != -1:
+                        # indeces for each block 
+                        soma_idx = np.arange(matfile['datastart'][int(loc_chan[idx]),a],
+                                     matfile['dataend'][int(loc_chan[idx]),a],dtype=int)
+                        # store each block as a column
+                        base_soma[:,a] = matfile['data'][:,soma_idx].T.reshape(-1)
+                elif loc_chan[idx] != -1:
+                    dend_idx = np.arange(matfile['datastart'][loc_chan[idx],a],
+                                     matfile['dataend'][loc_chan[idx],a],dtype=int)
+                    base_dend[:,a] = matfile['data'][:,dend_idx].T.reshape(-1)
     
     # fill in gaps in recording
     # check for mismatch between number of recorded blocks and expected number
