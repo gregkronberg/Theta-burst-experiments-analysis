@@ -5,6 +5,18 @@ Created on Thu Apr  6 11:57:16 2017
 @author: Greg Kronberg
 
 Preprocessing raw data files for LTP + DCS experiments
+
+Raw data are exported from LabChart as .mat files to the fpath_r directory
+
+This script checks for new slices (against already processed slices in fpath_p directory)
+
+Raw baseline data are organized as arrays with dimensions (time x recording blocks) 
+(base_dend and base_soma for dendritic and somatic recordings, respectively)
+
+Raw data during the plasticity induction period are stored separately (ind_dend and ind_soma)
+
+Baseline traces are plotted for each slice and the window to take the slope is selected. 
+Average slopes during this window are computed and normalized to the average of baseline slopes (stored as slopes_norm)
 """
 #==============================================================================
 # set up shell and modules
@@ -32,11 +44,15 @@ plt.close('all')
 # choose computer to run on (0 = laptop, 1 = lab desktop)
 comp = 1
 if comp == 0: # laptop
-    fpath_r = 'C:\Users\Greg Kronberg\Google Drive\Work\Research Projects\Theta LTP\Raw Matlab Data'
-    fpath_p = 'C:\Users\Greg Kronberg\Google Drive\Work\Research Projects\Theta LTP\Processed Matlab Data'
+    fpath_r = 'C:\\Users\\Greg Kronberg\\Google Drive\\Work\\Research Projects\
+\\Theta LTP\\Raw Matlab Data'
+    fpath_p = 'C:\Users\\Greg Kronberg\\Google Drive\\Work\\Research Projects\
+\\Theta LTP\\Processed Matlab Data'
 elif comp==1: # desktop
-    fpath_r = 'D:\\Google Drive\\Work\\Research Projects\\Theta LTP\\Raw Matlab Data\\'
-    fpath_p = 'D:\\Google Drive\\Work\\Research Projects\\Theta LTP\\Processed Matlab Data\\'
+    fpath_r = 'D:\\Google Drive\\Work\\Research Projects\\Theta LTP\
+\\Raw Matlab Data\\'
+    fpath_p = 'D:\\Google Drive\\Work\\Research Projects\\Theta LTP\
+\\Processed Matlab Data\\'
 
 # list files in each directory
 dir_r = os.listdir(fpath_r)
@@ -116,6 +132,7 @@ for slice in dir_new:
     
     #==============================================================================
     # organize raw data into arrays
+    # base_dend and base_soma are arrays of (time x blocks)
     #==============================================================================  
     # baseline index
     base_idx_pre = np.arange(ind_block[0]-baset_pre-1,ind_block[0]-1)
@@ -145,12 +162,12 @@ for slice in dir_new:
                             [int(loc_chan[idx]),a],matfile['dataend']
                             [int(loc_chan[idx]),a],dtype=int)
                         # store each block as a column
-                        base_soma[:,a] = matfile['data'][:,soma_idx].T.reshape(-1)
+                        base_soma[:,a] = matfile['data'][:,soma_idx].T.reshape(-1) # (time x blocks)
                 # repeat for dendritic recording
                 elif loc_chan[idx] != -1:
                     dend_idx = np.arange(matfile['datastart'][loc_chan[idx],a],
                                      matfile['dataend'][loc_chan[idx],a],dtype=int)
-                    base_dend[:,a] = matfile['data'][:,dend_idx].T.reshape(-1)
+                    base_dend[:,a] = matfile['data'][:,dend_idx].T.reshape(-1) # (time x blocks)
     
     # fill in gaps in recording
     # check for mismatch between number of recorded blocks and expected number
@@ -191,7 +208,6 @@ for slice in dir_new:
     
     # normalize slopes
     slopes_base_mean = np.mean(slopes_raw[base_idx[0:baset_pre]])
-    
     slopes_norm = slopes_raw/slopes_base_mean
     
     
