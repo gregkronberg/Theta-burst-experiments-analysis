@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt
 from scipy import stats
 import scipy.io as sio
 import os
+import re 
 
 #==============================================================================
 # Set up directories
@@ -43,9 +44,11 @@ dir_new = list(set(dir_r)-set(dir_p))
 #==============================================================================
 # experimental conditions
 #==============================================================================
-rec_loc = ['apical','basal','perforant','soma']
+rec_loc = ['Apical','Basal','Perforant','Soma']
 stim_loc = ['apical','basal','perforant']
 stim_dcs = ['control','cathodal','anodal']
+ind_num = ['induction_','induction2_','induction3_','induction4_']
+slice_info = ['age_','hemi_','height_','current_']
 drug = ['none']
 
 # baseline recording period (minutes)
@@ -57,7 +60,8 @@ com_columns= ['channel','block','sample','unknown','comment number']
 
 # preallocate
 ind_block = np.empty([4,1],dtype=int)
-
+loc_chan = -1*np.ones([len(rec_loc),1],dtype=int) # -1 means that location was not recorded
+info = []
 #==============================================================================
 # loop over new files
 #==============================================================================
@@ -78,57 +82,33 @@ for slice in dir_new:
     # extract experiment info from comments
     #==========================================================================
     # loop over comments
-    chan_soma=-1
-    chan_apical=-1
-    chan_basal=-1
-    chan_perforant=-1
     for idx,comment in enumerate(matfile['comtext']):
         com_chan = matfile['com'][idx,com_columns.index('channel')]-1
         com_block = matfile['com'][idx,com_columns.index('block')]        
         
-        # recording location
-        if 'Soma' in comment:
-            chan_soma = com_chan
-        if 'Apical' in comment:
-            chan_apical = com_chan
-        if 'Basal' in comment:
-            chan_basal = com_chan
-        if 'Perforant' in comment:
-            chan_perforant = com_chan
-            
-        # induction blocks
-        if 'induction_' in comment:
-            ind_block[0] = com_block
-        if 'induction2_' in comment:
-            ind_block[1] = com_block
-        if 'induction3_' in comment:
-            ind_block[2] = com_block
-        if 'induction4_' in comment:
-            ind_block[3] = com_block
+        # recording channels for each location
+        for idx1,loc in enumerate(rec_loc):
+            if loc in comment:
+                loc_chan[idx1] = com_chan # 0 = channel 1, 1 = channel 2
         
-        # age
-        if 'age_' in  comment:
-            ageI = comment.index('age_')
-            ageL = len('age_')
-            age = int(comment[ageI+ageL:ageI+ageL+2])
+        # recording block for each plasticity induction                
+        for idx2,num in enumerate(ind_num):
+            if num in comment:
+                ind_block[idx2] = com_block
         
-        # height of slice along dorsal/ventral axis
-        if 'height_' in  comment:
-            heightI = comment.index('height_')
-            heightL = len('height_')
-            height = int(comment[heightI+heightL:heightI+heightL+2])  
-        
-        # DCS current for 20 V/m field
-        if 'current_' in  comment:
-            currentI = comment.index('current_')
-            currentL = len('current_')
-            current = int(comment[currentI+currentL:currentI+currentL+3])
-
-        # brain hemisphere
-        if 'hemi_' in  comment:
-            hemiI = comment.index('hemi_')
-            hemiL = len('hemi_')
-            hemi = comment[hemiI+hemiL:hemiI+hemiL+1]   
+        # info about slice conditions
+        for idx3,info_com in enumerate(slice_info): # loop over slice attributes
+            if info_com in comment:
+                info_start = re.search(info_com,comment).end()
+                if info_com == 'height_':
+                    info_end = info_start+3
+                elif info_com == 'current_':
+                    info_end = info_start+4
+                else:
+                    info_end1 = re.search(info_com+'.*?_',comment)
+                    info_end = info_end1.end()
+                info.append(comment[info_start:info_end-1]) # list of attributes (same order as slice_info)
+                
     
     #==============================================================================
     # organize raw data into arrays
