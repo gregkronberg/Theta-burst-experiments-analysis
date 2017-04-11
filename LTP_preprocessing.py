@@ -82,7 +82,8 @@ com_columns= ['channel','block','sample','unknown','comment number']
 ind_block = np.empty([4,1],dtype=int)
 loc_chan = -1*np.ones([len(rec_loc),1],dtype=int) # -1 means that location was not recorded
 info = []
-#==============================================================================
+
+#%%==============================================================================
 # loop over new files
 #==============================================================================
 for slice in dir_new:
@@ -98,7 +99,7 @@ for slice in dir_new:
     # length of each recording block (samples)
     l_block = matfile['dataend']-matfile['datastart']
     
-    #==========================================================================
+    #%%==========================================================================
     # extract experiment info from comments
     #==========================================================================
     # loop over comments
@@ -130,12 +131,12 @@ for slice in dir_new:
                 info.append(comment[info_start:info_end-1]) # list of attributes (same order as slice_info)
                 
     
-    #==============================================================================
+    #%%==============================================================================
     # organize raw data into arrays
     # base_dend and base_soma are arrays of (time x blocks)
     #==============================================================================  
     # baseline index
-    base_idx_pre = np.arange(ind_block[0]-baset_pre-1,ind_block[0]-1)
+    base_idx_pre = np.arange(ind_block[0]-baset_pre-1,ind_block[0]-2)
     base_idx_post = np.arange(ind_block[0],ind_block[0]+baset_post)
     base_idx = np.concatenate((base_idx_pre,base_idx_post),0)
     
@@ -178,7 +179,7 @@ for slice in dir_new:
     if base_soma.shape[1]<max(base_idx):
         base_soma = np.concatenate((base_soma,base_soma[:,-1].reshape(-1,1)),axis=1)
         
-    #==============================================================================
+    #%%==============================================================================
     # take slopes of baseline traces     
     #==============================================================================
     # bipolar pulse paramters
@@ -210,7 +211,42 @@ for slice in dir_new:
     slopes_base_mean = np.mean(slopes_raw[base_idx[0:baset_pre]])
     slopes_norm = slopes_raw/slopes_base_mean
     
+    #%%==============================================================================
+    # Store raw data during induction period    
+    #==============================================================================
+    tbs_on = 2 # tbs onset delay during induction (s)
+    tbs_off = 5 # tbs offset during induction (s)
+    t_burst = .04 # duration of each tbs burst (s)
+    n_burst = 15 # number of bursts during tbs
+    n_pulse = 4 # number of bipolar pulses in each burst
+    r_burst = 100 # rate of pulses within each burst
+    # indeces of bipolar stimulus to remove from traces
+    bipolar_idx = np.arange(tbs_on*fs+1,tbs_on*fs + 3*np.round(.01*fs),
+                            np.round(.01*fs))
     
+    # loop over recording locations
+    for idx,loc in enumerate(rec_loc):
+        # check for somatic recording
+        if loc == 'Soma':
+            if loc_chan[idx] != -1:
+                # indeces for each block 
+                soma_idx = np.arange(matfile['datastart']
+                    [int(loc_chan[idx]),ind_block[0]-1],matfile['dataend']
+                    [int(loc_chan[idx]),ind_block[0]-1],dtype=int)
+                # store each block as a column
+                ind_soma = matfile['data'][:,soma_idx].T.reshape(-1) # (time series)
+                soma_tbs_idx = np.arange(tbs_on*fs,tbs_off*fs,dtype=int)
+                ind_soma_tbs = ind_soma[soma_tbs_idx]
+                ind_soma_bursts = np.reshape(ind_soma_tbs,(n_burst,-1))
+        # repeat for dendritic recording
+        elif loc_chan[idx] != -1:
+            dend_idx = np.arange(matfile['datastart'][loc_chan[idx],ind_block[0]-1],
+                             matfile['dataend'][loc_chan[idx],ind_block[0]-1],dtype=int)
+            ind_dend = matfile['data'][:,dend_idx].T.reshape(-1) # (time series)
+            dend_tbs_idx = np.arange(tbs_on*fs,tbs_off*fs,dtype=int)
+            ind_dend_tbs = ind_dend[dend_tbs_idx]
+            ind_dend_bursts = np.reshape(ind_dend_tbs,(n_burst,-1))
+
     
         
         
