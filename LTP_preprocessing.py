@@ -13,7 +13,7 @@ This script checks for new slices (against already processed slices in fpath_p d
 Raw baseline data are organized as arrays with dimensions (time x recording blocks) 
 (base_dend and base_soma for dendritic and somatic recordings, respectively)
 
-Raw data during the plasticity induction period are stored separately (ind_dend and ind_soma)
+Raw data during the plasticity induction period are stored separately (ind_dend and ind_soma) as arrays with dimensions (time series x bursts)
 
 Baseline traces are plotted for each slice and the window to take the slope is selected. 
 Average slopes during this window are computed and normalized to the average of baseline slopes (stored as slopes_norm)
@@ -47,12 +47,12 @@ if comp == 0: # laptop
     fpath_r = 'C:\\Users\\Greg Kronberg\\Google Drive\\Work\\Research Projects\
 \\Theta LTP\\Raw Matlab Data'
     fpath_p = 'C:\Users\\Greg Kronberg\\Google Drive\\Work\\Research Projects\
-\\Theta LTP\\Processed Matlab Data'
+\\Theta LTP\\Processed Python Data'
 elif comp==1: # desktop
     fpath_r = 'D:\\Google Drive\\Work\\Research Projects\\Theta LTP\
 \\Raw Matlab Data\\'
     fpath_p = 'D:\\Google Drive\\Work\\Research Projects\\Theta LTP\
-\\Processed Matlab Data\\'
+\\Processed Python Data\\'
 
 # list files in each directory
 dir_r = os.listdir(fpath_r)
@@ -86,6 +86,7 @@ info = []
 #%%==============================================================================
 # loop over new files
 #==============================================================================
+plt.figure()
 for slice in dir_new:
     # load matlab file
     matfile = sio.loadmat(fpath_r+slice)
@@ -194,8 +195,8 @@ for slice in dir_new:
     slope_t2 = int(pulse_t + .01*fs)
     
     # plot traces
-    slope_plot = plt.figure()
-    plt.plot(base_dend - base_dend[slope_t1,:])
+    plt.clf()
+    slope_plot = plt.plot(base_dend - base_dend[slope_t1,:])
     pylab.xlim([slope_t1,slope_t2])
     
     # select time window to take slope
@@ -223,29 +224,45 @@ for slice in dir_new:
     # indeces of bipolar stimulus to remove from traces
     bipolar_idx = np.arange(tbs_on*fs+1,tbs_on*fs + 3*np.round(.01*fs),
                             np.round(.01*fs))
+    burst_only = np.arange(0,t_burst*fs,dtype=int)
     
     # loop over recording locations
     for idx,loc in enumerate(rec_loc):
         # check for somatic recording
         if loc == 'Soma':
             if loc_chan[idx] != -1:
-                # indeces for each block 
+                # index for induction block 
                 soma_idx = np.arange(matfile['datastart']
                     [int(loc_chan[idx]),ind_block[0]-1],matfile['dataend']
                     [int(loc_chan[idx]),ind_block[0]-1],dtype=int)
-                # store each block as a column
+                # store induction block as vector
                 ind_soma = matfile['data'][:,soma_idx].T.reshape(-1) # (time series)
+                # index only during tbs
                 soma_tbs_idx = np.arange(tbs_on*fs,tbs_off*fs,dtype=int)
+                # time series data only during tbs
                 ind_soma_tbs = ind_soma[soma_tbs_idx]
-                ind_soma_bursts = np.reshape(ind_soma_tbs,(n_burst,-1))
+                # reshape to (time series x bursts)
+                ind_soma_burst = np.reshape(ind_soma_tbs,(-1,n_burst))
+                # remove time between bursts
+                ind_soma_burst_only = ind_soma_burst[burst_only,:]
         # repeat for dendritic recording
         elif loc_chan[idx] != -1:
+            # index for induction block
             dend_idx = np.arange(matfile['datastart'][loc_chan[idx],ind_block[0]-1],
                              matfile['dataend'][loc_chan[idx],ind_block[0]-1],dtype=int)
+            # store induction block as vector
             ind_dend = matfile['data'][:,dend_idx].T.reshape(-1) # (time series)
+            # index only during tbs
             dend_tbs_idx = np.arange(tbs_on*fs,tbs_off*fs,dtype=int)
+            # time series data only during tbs
             ind_dend_tbs = ind_dend[dend_tbs_idx]
-            ind_dend_bursts = np.reshape(ind_dend_tbs,(n_burst,-1))
+            # reshape to (time series x bursts)
+            ind_dend_burst = np.reshape(ind_dend_tbs,(-1,n_burst))
+            # remove time between bursts
+            ind_dend_burst_only = ind_dend_burst[burst_only,:]
+            
+
+    sio.savemat((fpath_p+slice),oned_as='column')
 
     
         
