@@ -45,12 +45,12 @@ plt.close('all')
 comp = 1
 if comp == 0: # laptop
     fpath_r = 'C:\\Users\\Greg Kronberg\\Google Drive\\Work\\Research Projects\
-\\Theta LTP\\Raw Matlab Data'
+\\Theta LTP\\Raw Python Data'
     fpath_p = 'C:\Users\\Greg Kronberg\\Google Drive\\Work\\Research Projects\
 \\Theta LTP\\Processed Python Data'
 elif comp==1: # desktop
     fpath_r = 'D:\\Google Drive\\Work\\Research Projects\\Theta LTP\
-\\Raw Matlab Data\\'
+\\Raw Python Data\\'
     fpath_p = 'D:\\Google Drive\\Work\\Research Projects\\Theta LTP\
 \\Processed Python Data\\'
 
@@ -82,6 +82,7 @@ com_columns= ['channel','block','sample','unknown','comment number']
 ind_block = np.empty([4,1],dtype=int)
 loc_chan = -1*np.ones([len(rec_loc),1],dtype=int) # -1 means that location was not recorded
 info = []
+mat_dict = {}
 
 #%%==============================================================================
 # loop over new files
@@ -260,9 +261,9 @@ for slice in dir_new:
             ind_dend_burst = np.reshape(ind_dend_tbs,(-1,n_burst))
             # remove time between bursts
             ind_dend_burst_only = ind_dend_burst[burst_only,:]
-            
+    mat_dict['slopes_norm'] = slopes_norm
 
-    sio.savemat((fpath_p+slice),oned_as='column')
+    sio.savemat((fpath_p+slice),mat_dict,oned_as='column')
 
     
         
