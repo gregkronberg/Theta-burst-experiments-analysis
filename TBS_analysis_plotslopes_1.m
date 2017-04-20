@@ -144,7 +144,7 @@ end
 height_range = 22:28;
 cutoff{apical} = 20170115;
 cutoff{basal} = 20170301;
-cutoff{perforant} = 0;
+cutoff{perforant} = 20170401;
 %% stats
 for a = 1:length(induction);
     for b = 1:length(stim);
@@ -289,7 +289,7 @@ figure;hold on
 for a = 1:length(induction);
     for b = 1:length(stim);
         for c = 1:length(intensity);
-            for d = 1:length(position);
+            for d = 2;%1:length(position);
                 for e = 1:length(drug);
                     if isempty(slices{a,b,c,d,e}) == 0;
                         plot(mean(slopes{a,b,c,d,e}(1:tbase,date_cut{a,b,c,d,e}),1),slopesEnd{a,b,c,d,e},'x','Color',stimcolor{b},'MarkerSize',10)
@@ -302,3 +302,19 @@ for a = 1:length(induction);
 end
 xlabel('initial epsp')
 ylabel('plasticity')
+
+%%
+figure;hold on
+for a = 1:length(induction);
+    for b = 1:length(stim);
+        for c = 1:length(intensity);
+            for d = 2;%1:length(position);
+                for e = 1:length(drug);
+                    if isempty(slices{a,b,c,d,e}) == 0;
+                        plot(dates{a,b,c,d,e}(date_cut{a,b,c,d,e}),slopesEnd{a,b,c,d,e},'.','Color',stimcolor{b},'MarkerSize',10)
+                    end
+                end    
+            end
+        end
+    end
+end
