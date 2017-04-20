@@ -22,6 +22,7 @@ basal = find(strcmp(position,'_basal'));
 perforant = find(strcmp(position,'_perforant'));
 
 stimcolor = {[0,0,0],[0,0,1],[1,0,0]};% figure colors for each stim condition
+stimcolor_shade = {[.5 .5 .5],[.7 .7 1],[1 .7 .7]};
 
 %% time conditions
 % baseline responses
@@ -86,6 +87,7 @@ end
 %% load each data file and store processed data
 baseArea = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
 indFilt1 = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
+indFilt2 = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
 indAll = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
 slopesN = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
 slopes = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
@@ -143,13 +145,11 @@ for d = 1:length(position)
                             baseArea{a,b,c,d,e}(f) = mean(sum(abs(base(:,...
                                 indBlock(1)-20:indBlock(1)-1)),1)); % average area under basleine fEPSP
                             
-                            
                             % filter time series recordings during induction to remove drift
-                            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                             indFilt1{a,b,c,d,e}(:,f) = filtfilt(dfiltHigh1,...
-                                indAll{a,b,c,d,e}(:,f));
-                            
+                                indAll{a,b,c,d,e}(:,f)); 
                         end
+                        
                         % Make each column the time series of a single burst
                         % 3rd dimension is slice number
                         indFilt1{a,b,c,d,e} = indFilt1{a,b,c,d,e}(tbsOn+1:tbsOff,:); % traces during TBS (time x slices)
@@ -166,6 +166,8 @@ for d = 1:length(position)
                         indFilt1{a,b,c,d,e} = indFilt1{a,b,c,d,e}-...
                             indFilt1{a,b,c,d,e}(1,:,:); %(time x burst x slice)
                         
+                        indFilt2{a,b,c,d,e} = reshape(indFilt1{a,b,c,d,e},[],size(indFilt1{a,b,c,d,e},3));
+                        
                         % integrate under each burst envelope
                         burstArea{a,b,c,d,e} = permute(sum(abs(indFilt1{a,b,c,d,e}),1),[2,3,1]); % (burst x slices)
                         
@@ -175,6 +177,15 @@ for d = 1:length(position)
                         
                         % Average burst area
                         burstAreaNmean{a,b,c,d,e} = mean(burstAreaN{a,b,c,d,e},1);
+                        
+                        % load data into a single matrix for
+                        % regression/correlation
+                        X = [X;d*ones(length(slopesEnd{a,b,c,d,e}),1),...
+                                b*ones(length(slopesEnd{a,b,c,d,e}),1),...
+                                burstAreaNmean{a,b,c,d,e}',heights{a,b,c,d,e}',...
+                                slopesEnd{a,b,c,d,e}'];
+                        
+
                         
                         %% figures
                         figure(d)
@@ -187,6 +198,28 @@ for d = 1:length(position)
             end
         end
     end
+    % correlation for each recording location
+    loc_ind = X(:,1) == d;
+    [R{d},P{d}] = corrcoef(X(loc_ind,[3,5]));
 end
-save('D:\Google Drive\Work\Research Projects\Theta LTP\Processed Variables\fepspArea.mat',...
-    'indFilt1','burstAreaN','burstAreaNmean','slopesEnd','heights','dates','hemis')
+
+%% figures
+burst_plot = 3; % which burst to plot
+for d = 1:length(position)
+    figure;hold on
+    for a = 1:length(induction)
+        for b = 1:length(stim)
+            for c = 1:length(intensity)
+                for e = 1:length(drug)
+                    if isempty(slices{a,b,c,d,e}) == 0
+                        plot(squeeze(mean(indFilt1{a,b,c,d,e}(:,burst_plot,:),3)),'Color',stimcolor{b},'LineWidth',2)
+%                         plot(squeeze(mean(indFilt1{a,b,c,d,e}(:,burst_plot,:),3)) + squeeze(std(indFilt1{a,b,c,d,e}(:,burst_plot,:),0,3)/sqrt(size(indFilt1{a,b,c,d,e},3))),'Color',stimcolor_shade{b})
+%                         plot(squeeze(mean(indFilt1{a,b,c,d,e}(:,burst_plot,:),3)) - squeeze(std(indFilt1{a,b,c,d,e}(:,burst_plot,:),0,3)/sqrt(size(indFilt1{a,b,c,d,e},3))),'Color',stimcolor_shade{b})
+                    end
+                end
+            end
+        end
+    end
+end
+save('D:\Google Drive\Work\Research Projects\Theta LTP\Processed Variables\Analysis\fepspArea.mat',...
+    'indFilt1','indFilt2','burstAreaN','burstAreaNmean','slopesEnd','heights','dates','hemis')
