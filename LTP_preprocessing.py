@@ -88,6 +88,8 @@ mat_dict = {}
 # loop over new files
 #==============================================================================
 plt.figure()
+class processed:
+    def _init_(self,)
 for slice in dir_new:
     # load matlab file
     matfile = sio.loadmat(fpath_r+slice)
