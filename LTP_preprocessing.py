@@ -88,8 +88,48 @@ mat_dict = {}
 # loop over new files
 #==============================================================================
 plt.figure()
-class processed:
-    def _init_(self,)
+class dataproc:
+    def __init__(self,raw,filename):
+        # preallocate
+        self.raw = raw
+        self.filename = filename
+        self.ind_block = np.empty([4,1],dtype=int)
+        self.loc_chan = -1*np.ones([len(rec_loc),1],dtype=int) # -1 means that location was not recorded
+        self.info = []
+        self.mat_dict = {}
+        
+    def _info_:
+        #%%==========================================================================
+        # extract experiment info from comments
+        #==========================================================================
+        # loop over comments
+        for idx,comment in enumerate(filename['comtext']):
+            com_chan = matfile['com'][idx,com_columns.index('channel')]-1
+            com_block = matfile['com'][idx,com_columns.index('block')]        
+            
+            # recording channels for each location
+            for idx1,loc in enumerate(rec_loc):
+                if loc in comment:
+                    loc_chan[idx1] = com_chan # 0 = channel 1, 1 = channel 2
+            
+            # recording block for each plasticity induction                
+            for idx2,num in enumerate(ind_num):
+                if num in comment:
+                    ind_block[idx2] = com_block
+            
+            # info about slice conditions
+            for idx3,info_com in enumerate(slice_info): # loop over slice attributes
+                if info_com in comment:
+                    info_start = re.search(info_com,comment).end()
+                    if info_com == 'height_':
+                        info_end = info_start+3
+                    elif info_com == 'current_':
+                        info_end = info_start+4
+                    else:
+                        info_end1 = re.search(info_com+'.*?_',comment)
+                        info_end = info_end1.end()
+                    info.append(comment[info_start:info_end-1]) # list of attributes (same order as slice_info)
+        
 for slice in dir_new:
     # load matlab file
     matfile = sio.loadmat(fpath_r+slice)
