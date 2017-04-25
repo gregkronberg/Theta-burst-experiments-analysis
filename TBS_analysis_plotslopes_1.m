@@ -2,8 +2,10 @@ clear all; close all; clc
 
 %% file paths and directories
 fpath = 'D:\Google Drive\Work\Research Projects\Theta LTP\Processed Matlab Data\';
+fpath_im = 'D:\Google Drive\Work\Research Projects\Theta LTP\Processed Images\';
 % fpath = 'C:\Users\Greg Kronberg\Google Drive\Work\Research Projects\Theta LTP\Processed Matlab Data\';
 direct = dir(strcat(fpath,'*.mat*')); % processed matlab files
+direct_im = dir(strcat(fpath_im,'*.mat*')); % processed matlab files
 
 %% define conditions
 induction = {'_TBS_'}; % plasticity induction protocol
@@ -45,6 +47,11 @@ for a = 1:length(induction);
     end
 end
 
+slices_im = cell(size(direct_im,1),1); %create empty cell array
+for a = 1:size(direct_im,1);
+    slices_im{a} = direct_im(a).name; % processed file names
+end
+
 %% store slopes and pop spikes by condition
 slopes = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
 slopesN = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
@@ -70,6 +77,10 @@ slopes_extra= cell(length(induction),length(stim),length(intensity),length(posit
 slopesN_extra= cell(length(induction),length(stim),length(intensity),length(position),length(drug));
 slopes_extra_mean= cell(length(induction),length(stim),length(intensity),length(position),length(drug));
 slopes_extra_std= cell(length(induction),length(stim),length(intensity),length(position),length(drug));
+slopes_spike_ratio= cell(length(induction),length(stim),length(intensity),length(position),length(drug));
+dist_stim_soma= cell(length(induction),length(stim),length(intensity),length(position),length(drug));
+dist_stim_dend= cell(length(induction),length(stim),length(intensity),length(position),length(drug));
+dist_rec_rec= cell(length(induction),length(stim),length(intensity),length(position),length(drug));
 for a = 1:length(induction);
     for b = 1:length(stim);
         for c = 1:length(intensity);
@@ -82,6 +93,9 @@ for a = 1:length(induction);
                         spikes{a,b,c,d,e} = zeros(tbase+tpost,length(slices{a,b,c,d,e}));
                         spikesN{a,b,c,d,e} = zeros(tbase+tpost,length(slices{a,b,c,d,e}));
                         rig{a,b,c,d,e} = zeros(length(slices{a,b,c,d,e}),1);
+                        dist_stim_soma{a,b,c,d,e} = zeros(length(slices{a,b,c,d,e}),1);
+                        dist_stim_dend{a,b,c,d,e} = zeros(length(slices{a,b,c,d,e}),1);
+                        dist_rec_rec{a,b,c,d,e} = zeros(length(slices{a,b,c,d,e}),1);
                         num_ind{a,b,c,d,e} = zeros(length(slices{a,b,c,d,e}),1);
                         slopesN_extra{a,b,c,d,e} = cell(4,1);
                         slopes_extra{a,b,c,d,e} = cell(4,1);
@@ -92,7 +106,14 @@ for a = 1:length(induction);
                                 'slopesD','indBlock',...
                                 'spike','spikeN','height','hemi','age',...
                                 'current','date');
-                            
+                            if sum(strcmp(slices_im,slices{a,b,c,d,e}(f).name))~=0
+                                load(strcat(fpath_im,slices{a,b,c,d,e}(f).name),...
+                                    'stim_to_soma','stim_to_dend','rec_to_rec');
+                                dist_stim_soma{a,b,c,d,e}(f) = stim_to_soma;
+                                dist_stim_dend{a,b,c,d,e}(f) = stim_to_dend;
+                                dist_rec_rec{a,b,c,d,e}(f) = rec_to_rec;
+                            end
+                                
                             % which rig?
                             if isempty(strfind(slices{a,b,c,d,e}(f).name,'rig'))==1
                                 rig{a,b,c,d,e}(f) = 1;
@@ -120,6 +141,7 @@ for a = 1:length(induction);
                             slopes_raw{a,b,c,d}{f} = slopesD;
                             spikes{a,b,c,d,e}(:,f) = spike;%popSpike([indBlock-tbase:indBlock-1,indBlock+1:indBlock+tpost]);
                             slopesN{a,b,c,d,e}(:,f) = slopes{a,b,c,d,e}(:,f)/mean(slopes{a,b,c,d,e}(1:tbase,f));
+                            slopes_spike_ratio{a,b,c,d,e}(f) = mean(spikes{a,b,c,d,e}(1:tbase,f))/mean(slopes{a,b,c,d,e}(1:tbase,f));
                             spikesN{a,b,c,d,e}(:,f) = spikeN;%spikes{a,b,c,d,e}(:,f)/mean(spikes{a,b,c,d,e}(1:tbase,f));
 %                             slopesIndN1{a,b,c,d,e}(:,f) = slopesInd{a,b,c,d,e}(:,f)/mean(slopes{a,b,c,d,e}(1:tbase,f));
 %                             slopesIndN2{a,b,c,d,e}(:,f) = slopesInd{a,b,c,d,e}(:,f)/slopesInd{a,b,c,d,e}(1,f);
@@ -144,7 +166,7 @@ end
 height_range = 22:28;
 cutoff{apical} = 20170115;
 cutoff{basal} = 20170301;
-cutoff{perforant} = 20170401;
+cutoff{perforant} = 0;%20170420;
 %% stats
 for a = 1:length(induction);
     for b = 1:length(stim);
@@ -289,7 +311,7 @@ figure;hold on
 for a = 1:length(induction);
     for b = 1:length(stim);
         for c = 1:length(intensity);
-            for d = 2;%1:length(position);
+            for d = 3;%1:length(position);
                 for e = 1:length(drug);
                     if isempty(slices{a,b,c,d,e}) == 0;
                         plot(mean(slopes{a,b,c,d,e}(1:tbase,date_cut{a,b,c,d,e}),1),slopesEnd{a,b,c,d,e},'x','Color',stimcolor{b},'MarkerSize',10)
@@ -301,6 +323,63 @@ for a = 1:length(induction);
     end
 end
 xlabel('initial epsp')
+ylabel('plasticity')
+
+%% plasticity as a function of baseline EPSP size
+figure;hold on
+for a = 1:length(induction);
+    for b = 1:length(stim);
+        for c = 1:length(intensity);
+            for d = 3;%1:length(position);
+                for e = 1:length(drug);
+                    if isempty(slices{a,b,c,d,e}) == 0;
+                        plot(mean(slopes{a,b,c,d,e}(1:tbase,date_cut{a,b,c,d,e}),1),slopesEnd{a,b,c,d,e},'x','Color',stimcolor{b},'MarkerSize',10)
+%                         plot(mean(spikes{a,b,c,d,e}(1:tbase,:),1),slopesEnd{a,b,c,d,e},'x','Color',stimcolor{b},'MarkerSize',10)
+                    end
+                end
+            end
+        end
+    end
+end
+xlabel('initial epsp')
+ylabel('plasticity')
+
+%% plasticity as a function of baseline distance from soma
+figure;hold on
+for a = 1:length(induction);
+    for b = 1:length(stim);
+        for c = 1:length(intensity);
+            for d = 3;%1:length(position);
+                for e = 1:length(drug);
+                    if isempty(slices{a,b,c,d,e}) == 0;
+                        plot(dist_stim_soma{a,b,c,d,e}(date_cut{a,b,c,d,e}),slopesEnd{a,b,c,d,e},'x','Color',stimcolor{b},'MarkerSize',10)
+%                         plot(mean(spikes{a,b,c,d,e}(1:tbase,:),1),slopesEnd{a,b,c,d,e},'x','Color',stimcolor{b},'MarkerSize',10)
+                    end
+                end
+            end
+        end
+    end
+end
+xlabel('distance from soma (um)')
+ylabel('plasticity')
+
+%% plasticity as a function of baseline spike:EPSP ratio
+figure;hold on
+for a = 1:length(induction);
+    for b = 1:length(stim);
+        for c = 1:length(intensity);
+            for d = 2;%1:length(position);
+                for e = 1:length(drug);
+                    if isempty(slices{a,b,c,d,e}) == 0;
+                        plot(mean(spikes{a,b,c,d,e}(1:tbase,date_cut{a,b,c,d,e}),1),slopesEnd{a,b,c,d,e},'x','Color',stimcolor{b},'MarkerSize',10)
+%                         plot(mean(spikes{a,b,c,d,e}(1:tbase,:),1),slopesEnd{a,b,c,d,e},'x','Color',stimcolor{b},'MarkerSize',10)
+                    end
+                end
+            end
+        end
+    end
+end
+xlabel('initial spike')
 ylabel('plasticity')
 
 %%
