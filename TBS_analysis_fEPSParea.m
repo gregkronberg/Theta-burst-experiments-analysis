@@ -61,7 +61,7 @@ dfiltHigh2 = designfilt('bandpassiir','FilterOrder',20,...
 slices = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
 slice = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
 cutoff(apical) = 20170115;
-cutoff(basal) = 20170401;
+cutoff(basal) = 20170301;
 cutoff(perforant) = 0;
 for a = 1:length(induction)
     for b = 1:length(stim)
@@ -99,6 +99,8 @@ hemis = cell(length(induction),length(stim),length(intensity),length(position),l
 burstArea = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
 burstAreaN = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
 burstAreaNmean = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
+baseFilt1 = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
+baseFilt2 = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
 X = [];
 for d = 1:length(position)
     figure(d);hold on
@@ -142,8 +144,16 @@ for d = 1:length(position)
                             base1 = ones(size(base,1),1)*base(1,:); % each column is the value of the first sample for that block
                             base = base-base1; % normalized and cropped baseline trace (time x blocks)
                             
+                            % filter time series during baseline to remove
+                            % drift
+                            baseFilt1{a,b,c,d,e}{f} = filtfilt(dfiltHigh1,...
+                                baseAll);
+                            
+                            % cropped trace to region for taking area
+                            baseFilt2{a,b,c,d,e}{f} = baseFilt1{a,b,c,d,e}{f}((pulset+bipolarWidth):pulset+(fs/rBurst),:);
+                            
                             % Area under fEPSP
-                            baseArea{a,b,c,d,e}(f) = mean(sum(abs(base(:,...
+                            baseArea{a,b,c,d,e}(f) = mean(sum(abs(baseFilt2{a,b,c,d,e}{f}(:,...
                                 indBlock(1)-20:indBlock(1)-1)),1)); % average area under basleine fEPSP
                             
                             % filter time series recordings during induction to remove drift
