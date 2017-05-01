@@ -143,7 +143,7 @@ end
 
 height_range = 22:28;
 cutoff{apical} = 20170115;
-cutoff{basal} = 20170301;
+cutoff{basal} = 20170401;
 cutoff{perforant} = 20170401;
 %% stats
 for a = 1:length(induction);

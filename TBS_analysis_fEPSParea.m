@@ -3,6 +3,7 @@ clear all; close all;clc
 
 %% file paths and directories
 fpath = 'D:\Google Drive\Work\Research Projects\Theta LTP\Processed Matlab Data\';
+% fpath = 'C:\Users\Greg Kronberg\Google Drive\Work\Research Projects\Theta LTP\Processed Matlab Data\';
 direct = dir(strcat(fpath,'*.mat*')); % processed matlab files
 
 %% define conditions
@@ -60,7 +61,7 @@ dfiltHigh2 = designfilt('bandpassiir','FilterOrder',20,...
 slices = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
 slice = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
 cutoff(apical) = 20170115;
-cutoff(basal) = 20170301;
+cutoff(basal) = 20170401;
 cutoff(perforant) = 0;
 for a = 1:length(induction)
     for b = 1:length(stim)

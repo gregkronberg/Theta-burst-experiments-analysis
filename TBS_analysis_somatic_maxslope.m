@@ -3,6 +3,7 @@ clear all; close all; clc
 
 %% file paths and directories
 fpath = 'D:\Google Drive\Work\Research Projects\Theta LTP\Processed Matlab Data\';
+% fpath = 'C:\Users\Greg Kronberg\Google Drive\Work\Research Projects\Theta LTP\Processed Matlab Data\';
 direct = dir(strcat(fpath,'*.mat*')); % processed matlab files
 
 slice_remove = ['20170117_1_TBS_control_0Vm_apical_none_rig1.mat',...
@@ -248,6 +249,8 @@ xlabel('TBS pulse number')
 ylabel('Normalize peak slope in somatic recording')
 
 %% 
-figure;plot(mean(indSfilt_maxN{1,3,3,1,1},1),slopesEnd{1,3,3,1,1},'.')
+figure;plot(mean(indSfilt_maxN{1,3,3,1,1},1),slopesEnd{1,3,3,1,1},'.r','MarkerSize',10)
+hold on;plot(mean(indSfilt_maxN{1,1,1,2,1},1),slopesEnd{1,1,1,2,1},'.k','MarkerSize',10)
+hold on;plot(mean(indSfilt_maxN{1,2,3,2,1},1),slopesEnd{1,2,3,2,1},'.b','MarkerSize',10)
 xlabel('Normalize peak slope in somatic recording')
 ylabel('LTP')
