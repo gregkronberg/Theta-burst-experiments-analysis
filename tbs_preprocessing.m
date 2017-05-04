@@ -58,6 +58,7 @@ for i = 1:length(slicesN)
     height = comment_find('height','value',com,comtext);
     
     % stimulation parameters
+    dcs = 
     current = comment_find('current','value',com,comtext);
     isolator = comment_find('isolator','value',com,comtext);
     path2 = comment_find('2path','value',com,comtext);

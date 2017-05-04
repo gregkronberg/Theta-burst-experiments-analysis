@@ -60,8 +60,8 @@ dfiltHigh2 = designfilt('bandpassiir','FilterOrder',20,...
 %% arrange file names by condition
 slices = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
 slice = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
-cutoff(apical) = 20170115;
-cutoff(basal) = 20170401;
+cutoff(apical) = 0;
+cutoff(basal) = 0;
 cutoff(perforant) = 0;
 for a = 1:length(induction)
     for b = 1:length(stim)
@@ -99,8 +99,8 @@ hemis = cell(length(induction),length(stim),length(intensity),length(position),l
 burstArea = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
 burstAreaN = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
 burstAreaNmean = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
-base = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
-burstAreaNmean = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
+baseFilt1 = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
+baseFilt2 = cell(length(induction),length(stim),length(intensity),length(position),length(drug));
 X = [];
 for d = 1:length(position)
     figure(d);hold on
@@ -232,5 +232,5 @@ for d = 1:length(position)
         end
     end
 end
-save('D:\Google Drive\Work\Research Projects\Theta LTP\Processed Variables\Analysis\fepspArea.mat',...
-    'indFilt1','indFilt2','burstAreaN','burstAreaNmean','slopesEnd','heights','dates','hemis')
+save('D:\Google Drive\Work\Research Projects\Theta LTP\Analysis\Processed Variables\fepspArea.mat',...
+    'indFilt1','indFilt2','baseFilt1','baseFilt2','baseArea','burstAreaN','slices')

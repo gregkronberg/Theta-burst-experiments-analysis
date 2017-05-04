@@ -4,17 +4,19 @@ clear all; close all; clc
 %% file paths and directories
 fpath = 'D:\Google Drive\Work\Research Projects\Theta LTP\Processed Matlab Data\';
 % fpath = 'C:\Users\Greg Kronberg\Google Drive\Work\Research Projects\Theta LTP\Processed Matlab Data\';
+
+fpath_variables = 'D:\Google Drive\Work\Research Projects\Theta LTP\Analysis\Processed Variables\';
+
 direct = dir(strcat(fpath,'*.mat*')); % processed matlab files
 
-% slice_remove = ['20170117_1_TBS_control_0Vm_apical_none_rig1.mat',...
-%     '20161019_1_TBS_anodal_20Vm_apical_none_rig1.mat'];
+slice_remove = ['20170117_1_TBS_control_0Vm_apical_none_rig1.mat',...
+    '20161019_1_TBS_anodal_20Vm_apical_none_rig1.mat'];
 
 %% define conditions
 induction = {'_TBS'}; % plasticity induction protocol
 stim = {'_control';'_cathodal';'_anodal'};% DCS stimulation conditions
 intensity = [0,5,20]; % stimulation intensity in V/m
 position = {'_apical';'_basal';'_perforant'}; % recording location in slice
-locs = {'A','B','P','S'}; % loc 
 drug = {'_none';'_mk801'};
 
 control = find(strcmp(stim,'_control'));
@@ -56,7 +58,7 @@ dfiltHigh1 = designfilt('highpassiir','StopbandFrequency',Fstop ,...
   'PassbandFrequency',Fpass,'StopbandAttenuation',Astop, ...
   'PassbandRipple',Apass,'SampleRate',fs);
 dfiltHigh2 = designfilt('bandpassiir','FilterOrder',20,...
-         'HalfPowerFrequency1',100,'HalfPowerFrequency2',500, ...
+         'HalfPowerFrequency1',200,'HalfPowerFrequency2',600, ...
          'SampleRate',fs);
      
 %% arrange file names by condition
@@ -156,7 +158,8 @@ for f = 1:length(slices{a,b,c,d,e})
     heights{a,b,c,d,e}(f) = height;
     dates{a,b,c,d,e}(f) = date;
     hemis{a,b,c,d,e}(f) = hemi;
-
+    name{a,b,c,d,e}{f} = slices{a,b,c,d,e}(f).name;
+    
     % somatic recording during baseline
     % store full baseline traces before cropping (time x blocks)
     baseSall = baseS; 
@@ -217,6 +220,8 @@ indSfilt_max2{a,b,c,d,e} = reshape(indSfilt_max{a,b,c,d,e},nPulse*nBurst,[]);
     end
 end
 
+save(strcat(fpath_variables,'somatic_maxslope.mat'),'indSfilt','baseSfilt',...
+    'baseSfilt_max','baseSfilt_max_i','indSfilt_maxN','indSfilt_max_i','slices')
 %% figures
 figure;plot(mean(indSfilt_maxN{1,3,3,1,1},2),'r')
 hold on;plot(mean(indSfilt_maxN{1,1,1,1,1},2),'k')

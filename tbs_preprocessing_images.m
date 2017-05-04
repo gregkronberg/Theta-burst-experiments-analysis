@@ -3,8 +3,9 @@
 clear all; close all; clc
 
 %% file paths
-fpathR = 'D:\Google Drive\Work\Research Projects\Theta LTP\Slice Images\';
+fpathR = 'D:\Google Drive\Work\Research Projects\Theta LTP\Raw Images\';
 fpathP = 'D:\Google Drive\Work\Research Projects\Theta LTP\Processed Images\';
+fpath_variables = 'D:\Google Drive\Work\Research Projects\Theta LTP\Analysis\Processed Variables\'
 % fpathR = 'C:\Users\Greg Kronberg\Google Drive\Work\Research Projects\Theta LTP\Slice Images\';
 % fpathP = 'C:\Users\Greg Kronberg\Google Drive\Work\Research Projects\Theta LTP\Processed Images\';
 
@@ -19,6 +20,7 @@ for a = 1:size(directR,1);
 end
 slicesP = cell(size(directP,1),1); %create empty cell array
 for a = 1:size(directP,1);
+    
     slicesP{a} = directP(a).name; % processed file names
 end
 
