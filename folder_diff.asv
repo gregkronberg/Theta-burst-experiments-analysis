@@ -1,0 +1,28 @@
+function new = folder_diff(directory1,directory2,file_type)
+
+% this function compares two directories and returns a cell containing file
+% names of files that are different between the directories.  Note that the
+% search is direction, i.e.files in directory1 are searched for in
+% directory2.  Any unique files in directory
+
+direct1_struct = dir(strcat(directory1,'*',file_type));
+direct2_struct = dir(strcat(directory2,'*',file_type));
+
+for a = 1:length(direct1_struct)
+    direct1{a} = direct1_struct(a).name;
+end
+for a = 1:length(direct2_struct)
+    direct1{a} = direct2_struct(a).name;
+end
+
+cnt = 0 
+if length(direct1)==length(direct2)
+    new = [];
+else
+    for a = 1:length(direct1)
+        if sum(strcmp(direct2,direct1{a}))==0                              % check if current slice is new
+            cnt = cnt+1;
+            new{cnt} = direct1{a};
+        end
+    end
+end
