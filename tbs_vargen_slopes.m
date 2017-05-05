@@ -1,6 +1,9 @@
 %% variable: manual fEPSP slopes and population spikes
 %==========================================================================
-% notes
+% Take slopes and population spikes of baseline respones and during
+% induction.  Data are stored as a structure called slopes in the Matlab
+% Variables folder.  slopes is organized according to the slices reference
+% structure, where each entry contains the slopes and info for each slice
 %==========================================================================
 
 clear all
@@ -34,13 +37,13 @@ for a = 1:length(conditions{1})
                     
 %===================================== loop over experimental conditions
 if isempty(slices{a,b,c,d,e})==0
-    slices_new{a,b,c,d,e} = strcmp( {slopes{a,b,c,d,e}(:).slices.name} , {slices{a,b,c,d,e}(:).name} );
-    for f = 1:length(slices_new{a,b,c,d,e})
-        if slices_new{a,b,c,d,e}(f)==0
+    for f = 1:length(slices{a,b,c,d,e})
+        if sum(strcmp({slopes{a,b,c,d,e}(:).name}',slices{a,b,c,d,e}(f).name))==0
 %====================================== loop over individual slices
         
             % load processed data
-            load(strcat(fpath_processed,slices{a,b,c,d,e}(f).name))
+            load(strcat(fpath_processed,slices{a,b,c,d,e}(f).name),...
+                'pulset','baseS','baseD','indD4','baseIndex','fs','tpre')
 
             %% population spikes of baseline traces
             %==================================================================
@@ -99,13 +102,29 @@ if isempty(slices{a,b,c,d,e})==0
                 slopesD(j) = mean( diff( baseD(...
                     round(tslope(1)):round(tslope(2)),j) ,1) )*fs;
             end
+            
+            tslope = tslope-pulset;
+            
+            %% slopes during tetanus
+            %==============================================================
+            indSlopes = zeros(size(indD4,2),size(indD4,3));
+            for j = 1:size(indD4,3)
+                for k = 1:size(indD4,2)
+                    indSlopes(k,j) = mean( diff( indD4(...
+                        round(tslope(1)):round(tslope(2)),k,j) ,1) )*fs; 
+                end
+            end
+            indSlopes = indSlopes(:);
 
             %% store slopes variable
             %==================================================================
             slopes{a,b,c,d,e}(f).slopes = slopesD;
             slopes{a,b,c,d,e}(f).spike = spike;
+            slopes{a,b,c,d,e}(f).indSlopes = indSlopes;
+            slopes{a,b,c,d,e}(f).baseIndex = baseIndex;
             slopes{a,b,c,d,e}(f).tslope = tslope;
             slopes{a,b,c,d,e}(f).slices = slices{a,b,c,d,e}(f);
+            slopes{a,b,c,d,e}(f).name = slices{a,b,c,d,e}(f).name;
 
             %===================================== end loop over individual slices
         end

@@ -21,7 +21,8 @@ for a = 1:length(conditions{1})
             for d = 1:length(conditions{4})
                 for e = 1:length(conditions{5})
 
-                    var_name{a,b,c,d,e}.slices = [];
+                    slopes{a,b,c,d,e}.slices = [];
+                    slopes{a,b,c,d,e}.name = 'temp';
                     
                 end
             end
@@ -29,6 +30,6 @@ for a = 1:length(conditions{1})
     end
 end
 
-save(strcat(fpath_variables,'var_name.mat'),'var_name');
+save(strcat(fpath_variables,'slopes.mat'),'slopes');
    
     
