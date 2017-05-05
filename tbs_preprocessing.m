@@ -262,7 +262,8 @@ if isempty(slices_new{a,b,c,d,e})==0
     
         %% save to processed data folder
         %==================================================================
-        save(strcat(fpath_processed,slices_new{a,b,c,d,e}{f}))
+        % save all variables except slices
+        save(strcat(fpath_processed,slices_new{a,b,c,d,e}{f}), '-regexp', '^(?!(slices)$).') 
 
 
         %===================================== end loop over individual slices
@@ -274,6 +275,7 @@ end
         end
     end
 end
+
 %% save updated global slices variable
 %==========================================================================
 save(strcat(fpath_variables,'slices.mat'),'slices','conditions');
