@@ -11,13 +11,11 @@
     % files in the folder "Processed Matlab Data"
 
 % Info about experimental conditions
-    % Experimental parameters are extracted from comments for each slice and
-    % stored in one structure called "slices", which is saved in the "Matlab
-    % Variables" folder.  slices is used as a reference to extract info about
-    % each slice in downstream processing steps.  Slices is organized as
-    % slices{conditions}(slice number).parameter. "conditions" is a cell that
-    % keeps track of the various experimental conditions and is stored in the
-    % same file as slices to be used in downstream processing
+% Experimental parameters are extracted from comments for each slice and
+% stored in one structure called "slices", which is saved in the "Matlab
+% Variables" folder.  slices is used as a reference to extract info about
+% each slice in downstream processing steps.  Slices is organized as
+% slices{conditions}(slice number).parameter
 %==========================================================================
 
 clear all; close all; clc
@@ -44,8 +42,7 @@ intensity = [0,5,20];                       % stimulation intensity in V/m
 position = {'apical';'basal';'perforant'};  % recording location in slice
 position_mark = {'.','x','*'};              % plotting symbol for each position
 drug = {'_none';'_mk801'};                  % drugs used
-% store conditions in single cell
-conditions = {induction,stim,intensity,position,drug};
+conditions = {}
 
 %% list slices for each condition
 %==========================================================================
@@ -162,7 +159,7 @@ if isempty(slices_new{a,b,c,d,e})==0
         %% store info from comments
         %==================================================================
         % add new info to global slice info structure
-        slices{a,b,c,d,e}(num+1).name = slices_new{a,b,c,d,e}{f};
+        slices{a,b,c,d,e}(num+1).name = slices_new{a,b,c,d,e};
         slices{a,b,c,d,e}(num+1).fs = fs;
         slices{a,b,c,d,e}(num+1).indBlock = indBlock;
         slices{a,b,c,d,e}(num+1).indType = indType;
@@ -276,7 +273,7 @@ end
 end
 %% save updated global slices variable
 %==========================================================================
-save(strcat(fpath_variables,'slices.mat'),'slices','conditions');
+save(strcat(fpath_variables,'slices'));
 
     
     
