@@ -27,7 +27,7 @@ load(strcat(fpath_variables,'slopes'));
 
 %% exclusion criteria
 %==========================================================================
-date_cut = [20170115 20170301 20170401];
+date_cut = [0 20170301 20170401];
 
 %==========================================================================
 %% preallocate
@@ -46,11 +46,11 @@ for a = 1:length(conditions{1})
                 for e = 1:length(conditions{5})
                     
 %===================================== loop over experimental conditions
-if isempty(slopes{a,b,c,d,e})==0
+if isempty(slices{a,b,c,d,e})==0
     % apply exclusion criteria
-    include = [slices{1,1,1,1,1}(:).date]'>date_cut(d);
-    slices_temp = slices{a,b,c,d,e}(include);
-    slopes_temp = slopes{a,b,c,d,e}(include);
+    include = [slices{a,b,c,d,e}(:).date]'>date_cut(d);
+    slices_temp{a,b,c,d,e} = slices{a,b,c,d,e}(include);
+    slopes_temp{a,b,c,d,e} = slopes{a,b,c,d,e}(include);
     % preallocate
     slopes_norm{a,b,c,d,e} = zeros(tpre+tpost,length(slopes_temp{a,b,c,d,e}));
     for f = 1:length(slopes_temp{a,b,c,d,e})
@@ -84,8 +84,8 @@ for a = 1:length(conditions{1})
 % stats
 %===================================
 % mean and standard error
-slopes_mean = mean(slopes_norm{a,b,c,d,e},2);
-slopes_sem = std(slopes_norm{a,b,c,d,e},0,2)/sqrt(size(slopes_norm{a,b,c,d,e},2));
+slopes_mean{a,b,c,d,e} = mean(slopes_norm{a,b,c,d,e},2);
+slopes_sem{a,b,c,d,e} = std(slopes_norm{a,b,c,d,e},0,2)/sqrt(size(slopes_norm{a,b,c,d,e},2));
 slopes_end{a,b,c,d,e} = mean(slopes_norm{a,b,c,d,e}(end-10:end,:),1);
 slopes_end_mean{a,b,c,d,e} = mean(slopes_end{a,b,c,d,e});
 slopes_end_sem{a,b,c,d,e} = std(slopes_end{a,b,c,d,e},0,2)/sqrt(length(slopes_end{a,b,c,d,e}));
@@ -122,6 +122,7 @@ title(strcat('TBS with ',conditions{2}{b},', ',num2str(conditions{3}(c)),'V/m, '
         end
     end
 end
+
 
 
 
