@@ -31,9 +31,6 @@ fpath_variables = 'D:\Google Drive\Work\Research Projects\Theta LTP\Matlab Varia
 fpath_analysis = 'D:\Google Drive\Work\Research Projects\Theta LTP\Analysis\';% analysis
 fpath_filters = 'D:\Google Drive\Work\Research Projects\Theta LTP\Filters\'; % filters
 
-%% load global slices structure
-%==========================================================================
-load(strcat(fpath_variables,'slices'));
 
 %% define experimental conditions
 %==========================================================================
@@ -46,6 +43,12 @@ position_mark = {'.','x','*'};              % plotting symbol for each position
 drug = {'_none';'_mk801'};                  % drugs used
 % store conditions in single cell
 conditions = {induction,stim,intensity,position,drug};
+
+
+%% load global slices structure
+%==========================================================================
+load(strcat(fpath_variables,'slices'));
+
 
 %% list slices for each condition
 %==========================================================================
@@ -240,10 +243,10 @@ if isempty(slices_new{a,b,c,d,e})==0
         elseif perforant ~= 0 
             indD =  data(datastart(perforant,indBlock(1)):dataend(perforant,indBlock(1)))';
         end
-        indD1 = indD(tbsOn*fs+1:tbsOff*fs);
-        indD2 = reshape(indD1,[],nBurst);
-        indD3 = indD2(1:round(tBurst*fs),:);
-        indD4 = reshape(indD3,[],nPulse,nBurst);
+        indD1 = indD(tbsOn*fs+1:tbsOff*fs); % (time)
+        indD2 = reshape(indD1,[],nBurst);% (time x bursts)
+        indD3 = indD2(1:round(tBurst*fs),:);% (time x bursts)
+        indD4 = reshape(indD3,[],nPulse,nBurst);% (time x pulses x bursts)
         
         
         %% apply filters
@@ -263,7 +266,7 @@ if isempty(slices_new{a,b,c,d,e})==0
         %% save to processed data folder
         %==================================================================
         % save all variables except slices
-        save(strcat(fpath_processed,slices_new{a,b,c,d,e}{f}), '-regexp', '^(?!(slices)$).') 
+        save(strcat(fpath_processed,slices_new{a,b,c,d,e}{f}), '-regexp', '^(?!(slices|conditions)$).') 
 
 
         %===================================== end loop over individual slices

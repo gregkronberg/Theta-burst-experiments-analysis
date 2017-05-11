@@ -76,6 +76,7 @@ if isempty(slices{a,b,c,d,e})==0
             plot(t1:t2,baseS(t1:t2,baseIndex(tpre+1:end))...
                 -ones(length(t1:t2),1)*baseS(t1,baseIndex(tpre+1:end)));
             title('Select times of 3 consecutive peaks for population spike')
+            ylim([-.005 .005])
             [peakt,peakv] = ginput(3);
             for j = 21:length(baseIndex);                               
                 fitx = [ones(2,1) round(peakt([1 3]))];
@@ -96,6 +97,7 @@ if isempty(slices{a,b,c,d,e})==0
             t2 = pulset + .01*fs;
             plot(t1:t2,baseD(t1:t2,baseIndex)-ones(length(t1:t2)...
                 ,1)*mean(baseD(t1:t2,baseIndex),1));                % plot all baseline traces
+            ylim([-.005 .005])
             [tslope,yslope] = ginput(2);                            % select slope start and end time points
             slopesD = zeros(size(baseD,2),1);
             for j = 1:size(baseD,2)                             % store all slopes 

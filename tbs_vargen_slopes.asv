@@ -3,7 +3,7 @@
 % Take slopes and population spikes of baseline respones and during
 % induction.  Data are stored as a structure called slopes in the Matlab
 % Variables folder.  slopes is organized according to the slices reference
-% structure
+% structure, where each entry contains the slopes and info for each slice
 %==========================================================================
 
 clear all
@@ -76,6 +76,7 @@ if isempty(slices{a,b,c,d,e})==0
             plot(t1:t2,baseS(t1:t2,baseIndex(tpre+1:end))...
                 -ones(length(t1:t2),1)*baseS(t1,baseIndex(tpre+1:end)));
             title('Select times of 3 consecutive peaks for population spike')
+            
             [peakt,peakv] = ginput(3);
             for j = 21:length(baseIndex);                               
                 fitx = [ones(2,1) round(peakt([1 3]))];
@@ -103,17 +104,24 @@ if isempty(slices{a,b,c,d,e})==0
                     round(tslope(1)):round(tslope(2)),j) ,1) )*fs;
             end
             
+            tslope = tslope-pulset;
+            
             %% slopes during tetanus
             %==============================================================
+            indSlopes = zeros(size(indD4,2),size(indD4,3));
             for j = 1:size(indD4,3)
                 for k = 1:size(indD4,2)
                     indSlopes(k,j) = mean( diff( indD4(...
                         round(tslope(1)):round(tslope(2)),k,j) ,1) )*fs; 
+                end
+            end
+            indSlopes = indSlopes(:);
 
             %% store slopes variable
             %==================================================================
             slopes{a,b,c,d,e}(f).slopes = slopesD;
             slopes{a,b,c,d,e}(f).spike = spike;
+            slopes{a,b,c,d,e}(f).indSlopes = indSlopes;
             slopes{a,b,c,d,e}(f).baseIndex = baseIndex;
             slopes{a,b,c,d,e}(f).tslope = tslope;
             slopes{a,b,c,d,e}(f).slices = slices{a,b,c,d,e}(f);
