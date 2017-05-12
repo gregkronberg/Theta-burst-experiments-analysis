@@ -1,4 +1,4 @@
-%% analysis: fEPSP slopes
+%% analysis: electrode location
 %==========================================================================
 % plot slopes over time for each condtion
 %==========================================================================
@@ -21,6 +21,7 @@ fpath_filters = 'D:\Google Drive\Work\Research Projects\Theta LTP\Filters\'; % f
 %==========================================================================
 load(strcat(fpath_variables,'slices')); % slices
 load(strcat(fpath_variables,'slopes')); % slopes
+load(strcat(fpath_variables,'electrode_location')); % slopes
 
 % exclusion criteria
 %==========================================================================
@@ -64,15 +65,8 @@ ind_slopes_norm{a,b,c,d,e}(:,f)  = slopes_temp{a,b,c,d,e}(f).indSlopes/slopes_ba
 spikes_base_mean{a,b,c,d,e}(f) = mean(slopes_temp{a,b,c,d,e}(f).spike((1:tpre)));
 spikes_norm{a,b,c,d,e}(:,f) = slopes_temp{a,b,c,d,e}(f).spike'/spikes_base_mean{a,b,c,d,e}(f); % (blocks x slices)
 
-% slice parameters
-height{a,b,c,d,e} = [slices{a,b,c,d,e}(:).height];
-date{a,b,c,d,e} = [slices{a,b,c,d,e}(:).date];
-age{a,b,c,d,e} = [slices{a,b,c,d,e}(:).age];
-        
-%===================================== end loop over individual slices
     end
 end
-%===================================== end loop over experimental conditions
                 end
             end
         end
@@ -105,34 +99,7 @@ slopes_end_sem{a,b,c,d,e} = std(slopes_end{a,b,c,d,e},0,2)/sqrt(length(slopes_en
     end
 end
 
-%% plot slopes over time
-%==========================================================================
-for a = 1:length(conditions{1})
-    for b = 1:length(conditions{2})
-        for c = 1:length(conditions{3})
-            for d = 1:length(conditions{4})
-                for e = 1:length(conditions{5})
-                    if isempty(slices{a,b,c,d,e})==0
-figure;hold on
-errorbar(t,slopes_mean{a,b,c,d,e},slopes_sem{a,b,c,d,e},...
-    '.','Color',stim_color{b},'MarkerSize',30);
-errorbar(t,slopes_mean{a,1,1,d,e},slopes_sem{a,1,1,d,e},...
-    '.','Color',stim_color{1},'MarkerSize',30);
-
-% format figure
-run('figure_format_slopes')
-xlabel('Time (min)','FontSize',30,'FontWeight','bold')
-ylabel('Normalize fEPSP slope','FontSize',30,'FontWeight','bold')
-title(strcat('TBS with ',conditions{2}{b},', ',num2str(conditions{3}(c)),'V/m, ',conditions{4}{d}));
-                    end
-                end
-            end
-        end
-    end
-end
-
-
-%% plot final plasticity comparing within each day
+%% plot fiber volleys over time
 %==========================================================================
 for d = 1:length(conditions{4})
     figure;hold on
@@ -141,77 +108,26 @@ for d = 1:length(conditions{4})
             for c = [1,3];%:length(conditions{3})
                     for e = 1:length(conditions{5})
                         if isempty(slices{a,b,c,d,e})==0
-                            
-plot(b*ones(length(slopes_end{a,b,c,d,e})),slopes_end{a,b,c,d,e},'.',...
-    'Color',stim_color{b},'MarkerSize',30)
-title(strcat('TBS with',num2str(conditions{3}(c)),'V/m, ',conditions{4}{d}));
-xlim([0 4])
-                        end
-                    end
-            end
-        end
+for f = 1:length(electrode_location{a,b,c,d,e})
+    if isempty(electrode_location{a,b,c,d,e}(f).stim_to_soma)
+        stim_soma{a,b,c,d,e}(f) = 0;
+    else
+        stim_soma{a,b,c,d,e}(f) = electrode_location{a,b,c,d,e}(f).stim_to_soma;
     end
 end
 
-%% plasticity as a function of baseline slopes
-%==========================================================================
-for d = 1:length(conditions{4})
-    figure;hold on
-    for a = 1:length(conditions{1})
-        for b = 1:length(conditions{2})
-            for c = [1,3];%:length(conditions{3})
-                    for e = 1:length(conditions{5})
-                        if isempty(slices{a,b,c,d,e})==0
-plot(abs(slopes_base_mean{a,b,c,d,e}),slopes_end{a,b,c,d,e},'.','Color',...
-    stim_color{b},'MarkerSize',30)
-xlabel('Baseline fEPSP slope')
-ylabel('plasticity')
-                        end
-                    end
-            end
-        end
-    end
-end
-
-%% plasticity as a function of baseline spikes
-%==========================================================================
-for d = 1:length(conditions{4})
-    figure;hold on
-    for a = 1:length(conditions{1})
-        for b = 1:length(conditions{2})
-            for c = [1,3];%:length(conditions{3})
-                    for e = 1:length(conditions{5})
-                        if isempty(slices{a,b,c,d,e})==0
-plot(abs(spikes_base_mean{a,b,c,d,e}),slopes_end{a,b,c,d,e},'.','Color',...
-    stim_color{b},'MarkerSize',30)
+%
+plot((stim_soma{a,b,c,d,e}),slopes_end{a,b,c,d,e}(1:length(stim_soma{a,b,c,d,e})),'.','Color',...
+stim_color{b},'MarkerSize',30)
+ylim([0 4])
+% 
+% plot(abs(spikes_base_mean{a,b,c,d,e}(1:length(stim_soma{a,b,c,d,e}))./...
+%     slopes_base_mean{a,b,c,d,e}(1:length(stim_soma{a,b,c,d,e}))),stim_soma{a,b,c,d,e},'.','Color',...
+%     stim_color{b},'MarkerSize',30)
 xlabel('Baseline pop spike amplitude')
 ylabel('plasticity')
                         end
                     end
-            end
-        end
-    end
-end
-
-%% plasticity as a function of baseline spike/slope ratio
-%==========================================================================
-for d = 1:length(conditions{4})
-    figure;hold on
-    for a = 1:length(conditions{1})
-        for b = 1;%:length(conditions{2})
-            for c = [1,3];%:length(conditions{3})
-                for e = 1:length(conditions{5})
-                    if isempty(slices{a,b,c,d,e})==0
-
-
-plot(abs(spikes_base_mean{a,b,c,d,e}./slopes_base_mean{a,b,c,d,e}),slopes_end{a,b,c,d,e},'.','Color',...
-    stim_color{b},'MarkerSize',30)
-xlabel('Baseline pop spikeamplitude:fEPSP slope ratio')
-ylabel('plasticity')
-
-
-                    end
-                end
             end
         end
     end
