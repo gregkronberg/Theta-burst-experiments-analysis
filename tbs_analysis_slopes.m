@@ -111,7 +111,7 @@ for a = 1:length(conditions{1})
 slopes_norm_temp = [slopes{a,b,c,d,e}(include{a,b,c,d,e}).slopes_norm];
 slopes_mean{a,b,c,d,e} = mean(slopes_norm_temp,2);
 slopes_sem{a,b,c,d,e} = std(slopes_norm_temp,0,2)/sqrt(size(slopes_norm_temp,2));
-slopes_end{a,b,c,d,e} = mean(slopes_norm_temp(end-10:end,:),1);
+slopes_end{a,b,c,d,e} = mean(slopes_norm_temp(end-9:end,:),1);
 slopes_end_mean{a,b,c,d,e} = mean(slopes_end{a,b,c,d,e});
 slopes_end_sem{a,b,c,d,e} = std(slopes_end{a,b,c,d,e},0,2)/sqrt(length(slopes_end{a,b,c,d,e}));
 
