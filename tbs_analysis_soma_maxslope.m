@@ -1,6 +1,6 @@
-%% analysis: electrode location
+%% analysis: soma max slope
 %==========================================================================
-% plot slopes over time for each condtion
+% notes
 %==========================================================================
 
 clear all
@@ -27,9 +27,9 @@ fpath_filters = 'D:\Google Drive\Work\Research Projects\Theta LTP\Filters\'; % f
 
 % load global structures
 %==========================================================================
-load(strcat(fpath_variables,'slices')); % slices
-load(strcat(fpath_variables,'slopes')); % slopes
-load(strcat(fpath_variables,'electrode_location')); % slopes
+load(strcat(fpath_variables,'slices.mat')); % slices
+load(strcat(fpath_variables,'slopes.mat')); % slopes
+load(strcat(fpath_variables,'soma_maxslope.mat')); % slopes
 
 % exclusion criteria
 %==========================================================================
@@ -56,9 +56,11 @@ if isempty(slices{a,b,c,d,e})==0
     include = [slices{a,b,c,d,e}(:).date]'>date_cut(d);
     slices_temp{a,b,c,d,e} = slices{a,b,c,d,e}(include);
     slopes_temp{a,b,c,d,e} = slopes{a,b,c,d,e}(include);
+    soma_maxslope_temp{a,b,c,d,e} = soma_maxslope{a,b,c,d,e}(include);
     
+    if isempty(slices_temp{a,b,c,d,e})==0
     % preallocate
-    for f = 1:length(slopes_temp{a,b,c,d,e})
+        for f = 1:length(slopes_temp{a,b,c,d,e})
 %====================================== loop over individual slices
 
 % index for baseline responses
@@ -73,8 +75,31 @@ ind_slopes_norm{a,b,c,d,e}(:,f)  = slopes_temp{a,b,c,d,e}(f).indSlopes/slopes_ba
 spikes_base_mean{a,b,c,d,e}(f) = mean(slopes_temp{a,b,c,d,e}(f).spike((1:tpre)));
 spikes_norm{a,b,c,d,e}(:,f) = slopes_temp{a,b,c,d,e}(f).spike'/spikes_base_mean{a,b,c,d,e}(f); % (blocks x slices)
 
+% max slope
+maxslope_norm{a,b,c,d,e}(:,f) = mean(soma_maxslope_temp{a,b,c,d,e}(f).soma_maxslope_norm,1);
+maxslope_mean{a,b,c,d,e}(f) = mean(maxslope_norm{a,b,c,d,e}(:,f));
+maxslope_max{a,b,c,d,e}(f) = max(maxslope_norm{a,b,c,d,e}(:,f));
+maxslope_adapt{a,b,c,d,e}(f) = mean(maxslope_norm{a,b,c,d,e}(end,f))/mean(maxslope_norm{a,b,c,d,e}(1,f));
+
+% timing
+maxslope_i{a,b,c,d,e}(:,f) = soma_maxslope{a,b,c,d,e}(f).soma_maxslope_index(:);
+maxslope_base_i{a,b,c,d,e}(f) = mean(soma_maxslope{a,b,c,d,e}(f).base_max_index);
+maxslope_i_norm{a,b,c,d,e}(:,f) = maxslope_i{a,b,c,d,e}(:,f) - maxslope_base_i{a,b,c,d,e}(f);
+maxslope_i_mean{a,b,c,d,e}(f) = mean(maxslope_i_norm{a,b,c,d,e}(:,f));
+maxslope_i_max{a,b,c,d,e}(f) = max(maxslope_i_norm{a,b,c,d,e}(:,f));
+maxslope_i_adapt{a,b,c,d,e}(f) = mean(maxslope_i_norm{a,b,c,d,e}(end,f))/mean(maxslope_i_norm{a,b,c,d,e}(1,f));
+soma_trace{a,b,c,d,e}(:,:,f) = reshape(soma_maxslope_temp{a,b,c,d,e}(f).ind_trace,[],60);
+
+% slice parameters
+height{a,b,c,d,e} = [slices{a,b,c,d,e}(:).height];
+date{a,b,c,d,e} = [slices{a,b,c,d,e}(:).date];
+age{a,b,c,d,e} = [slices{a,b,c,d,e}(:).age];
+        
+%===================================== end loop over individual slices
+        end
     end
 end
+%===================================== end loop over experimental conditions
                 end
             end
         end
@@ -89,6 +114,7 @@ for a = 1:length(conditions{1})
             for d = 1:length(conditions{4})
                 for e = 1:length(conditions{5})
                     if isempty(slices{a,b,c,d,e})==0
+                        if isempty(slices_temp{a,b,c,d,e})==0
 
 % mean and standard error
 slopes_mean{a,b,c,d,e} = mean(slopes_norm{a,b,c,d,e},2);
@@ -100,6 +126,8 @@ slopes_end_sem{a,b,c,d,e} = std(slopes_end{a,b,c,d,e},0,2)/sqrt(length(slopes_en
 % pairwise comparisons to no DCS (1st parameter of condition b)
 [h,slopes_p{a,b,c,d,e}] = ttest2(slopes_end{a,1,1,d,e},slopes_end{a,b,c,d,e});
                    
+                    
+                        end
                     end
                 end
             end
@@ -107,35 +135,21 @@ slopes_end_sem{a,b,c,d,e} = std(slopes_end{a,b,c,d,e},0,2)/sqrt(length(slopes_en
     end
 end
 
-%% plot 
+%% plot maxslope vs plasticity
 %==========================================================================
 for d = 1:length(conditions{4})
     figure;hold on
     for a = 1:length(conditions{1})
         for b = 1:length(conditions{2})
             for c = [1,3];%:length(conditions{3})
-                    for e = 1:length(conditions{5})
-                        if isempty(slices{a,b,c,d,e})==0
-for f = 1:length(electrode_location{a,b,c,d,e})
-    if isempty(electrode_location{a,b,c,d,e}(f).stim_to_soma)
-        stim_soma{a,b,c,d,e}(f) = 0;
-    else
-        stim_soma{a,b,c,d,e}(f) = electrode_location{a,b,c,d,e}(f).stim_to_soma;
-    end
-end
-
-%
-plot((stim_soma{a,b,c,d,e}),slopes_end{a,b,c,d,e}(1:length(stim_soma{a,b,c,d,e})),'.','Color',...
-stim_color{b},'MarkerSize',30)
-ylim([0 4])
-% 
-% plot(abs(spikes_base_mean{a,b,c,d,e}(1:length(stim_soma{a,b,c,d,e}))./...
-%     slopes_base_mean{a,b,c,d,e}(1:length(stim_soma{a,b,c,d,e}))),stim_soma{a,b,c,d,e},'.','Color',...
-%     stim_color{b},'MarkerSize',30)
-xlabel('Baseline pop spike amplitude')
-ylabel('plasticity')
+                for e = 1:length(conditions{5})
+                    if isempty(slices{a,b,c,d,e})==0
+                        if isempty(slices_temp{a,b,c,d,e})==0
+plot(maxslope_mean{a,b,c,d,e},slopes_end{a,b,c,d,e},'.','Color',...
+    stim_color{b},'MarkerSize',30)
                         end
                     end
+                end
             end
         end
     end
