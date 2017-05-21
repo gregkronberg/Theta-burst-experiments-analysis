@@ -83,6 +83,13 @@ end
 % fiber volley
 features(cnt).fiber_volley = mean(fiber_volley{a,b,c,d,e}(f).fiber_volley_norm(1,:));
 
+% burst area
+features(cnt).burst_area_first = fepsp_area{a,b,c,d,e}(f).burst_area_norm(1);
+features(cnt).burst_area_mean = fepsp_area{a,b,c,d,e}(f).burst_area_mean;
+features(cnt).burst_area_max = fepsp_area{a,b,c,d,e}(f).burst_area_max;
+features(cnt).burst_area_adapt = fepsp_area{a,b,c,d,e}(f).burst_area_adapt;
+
+% soma max slope
 
 
                         end
@@ -92,8 +99,10 @@ features(cnt).fiber_volley = mean(fiber_volley{a,b,c,d,e}(f).fiber_volley_norm(1
         end
     end
 end
-                         
-                            
+
+% store all data as single matrix
+
+% canonical correlation                           
                             
                             
 
