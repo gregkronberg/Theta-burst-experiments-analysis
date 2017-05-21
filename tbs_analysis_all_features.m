@@ -90,7 +90,14 @@ features(cnt).burst_area_max = fepsp_area{a,b,c,d,e}(f).burst_area_max;
 features(cnt).burst_area_adapt = fepsp_area{a,b,c,d,e}(f).burst_area_adapt;
 
 % soma max slope
-
+features(cnt).soma_maxslope_first = soma_maxslope{a,b,c,d,e}(f).maxslope_norm(1);
+features(cnt).soma_maxslope_mean = soma_maxslope{a,b,c,d,e}(f).maxslope_mean;
+features(cnt).soma_maxslope_max = soma_maxslope{a,b,c,d,e}(f).maxslope_max;
+features(cnt).soma_maxslope_adapt = soma_maxslope{a,b,c,d,e}(f).maxslope_adapt;
+features(cnt).soma_maxslope_i_first = soma_maxslope{a,b,c,d,e}(f).maxslope_i_norm(1);
+features(cnt).soma_maxslope_i_mean = soma_maxslope{a,b,c,d,e}(f).maxslope_i_mean;
+features(cnt).soma_maxslope_i_max = soma_maxslope{a,b,c,d,e}(f).maxslope_i_max;
+features(cnt).soma_maxslope_i_adapt = soma_maxslope{a,b,c,d,e}(f).maxslope_i_adapt;
 
                         end
                     end
