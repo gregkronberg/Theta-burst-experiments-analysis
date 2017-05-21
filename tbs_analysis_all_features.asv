@@ -69,22 +69,35 @@ features(cnt).drift = drift{a,b,c,d,e}(f).slopes_drift;
 features(cnt).drift_time = drift{a,b,c,d,e}(f).time;
 
 % dcs magnitude
-if isempty(dcs_magnitude{a,b,c,d,e}(f).slices)==0
+if length(dcs_magnitude{a,b,c,d,e})>1 && isempty(dcs_magnitude{a,b,c,d,e}(1).slices)==0
     features(cnt).dcs_magnitude = dcs_magnitude{a,b,c,d,e}(f).dcs_magnitude;
     % electrode loacation
     features(cnt).stim_to_soma = electrode_location{a,b,c,d,e}(f).stim_to_soma;
     features(cnt).stim_to_dend = electrode_location{a,b,c,d,e}(f).stim_to_dend;
 else
     features(cnt).dcs_magnitude = [];
-    features(cnt).stim_to_ = [];
-    features(cnt).dcs_magnitude = [];
+    features(cnt).stim_to_soma = [];
+    features(cnt).stim_to_dend = [];
 end
-
 
 % fiber volley
 features(cnt).fiber_volley = mean(fiber_volley{a,b,c,d,e}(f).fiber_volley_norm(1,:));
 
+% burst area
+features(cnt).burst_area_first = fepsp_area{a,b,c,d,e}(f).burst_area_norm(1);
+features(cnt).burst_area_mean = fepsp_area{a,b,c,d,e}(f).burst_area_mean;
+features(cnt).burst_area_max = fepsp_area{a,b,c,d,e}(f).burst_area_max;
+features(cnt).burst_area_adapt = fepsp_area{a,b,c,d,e}(f).burst_area_adapt;
 
+% soma max slope
+features(cnt).soma_maxslope_first = soma_maxslope{a,b,c,d,e}(f).maxslope_norm(1);
+features(cnt).soma_maxslope_mean = soma_maxslope{a,b,c,d,e}(f).maxslope_mean;
+features(cnt).soma_maxslope_max = soma_maxslope{a,b,c,d,e}(f).maxslope_max;
+features(cnt).soma_maxslope_adapt = soma_maxslope{a,b,c,d,e}(f).maxslope_adapt;
+features(cnt).soma_maxslope_i_first = soma_maxslope{a,b,c,d,e}(f).maxslope_i_norm(1);
+features(cnt).soma_maxslope_i_mean = soma_maxslope{a,b,c,d,e}(f).maxslope_i_mean;
+features(cnt).soma_maxslope_i_max = soma_maxslope{a,b,c,d,e}(f).maxslope_i_max;
+features(cnt).soma_maxslope_i_adapt = soma_maxslope{a,b,c,d,e}(f).maxslope_i_adapt;
 
                         end
                     end
@@ -93,8 +106,17 @@ features(cnt).fiber_volley = mean(fiber_volley{a,b,c,d,e}(f).fiber_volley_norm(1
         end
     end
 end
-                         
-                            
+
+%% store all data as single matrix
+feature_names = fieldnames(features);
+feature_cell = cell(length(features),length(feature_names));
+for a = 1:length(features)
+    for b = 1:length(feature_names);
+        feature_cell{a,b} = features{a}.(feature_names{b})
+    end
+end
+
+% canonical correlation                           
                             
                             
 

@@ -39,7 +39,7 @@ load(strcat(fpath_variables,'fepsp_area.mat'));
 
 %% create list of all slices
 %==========================================================================
-cnt = 0
+cnt = 0;
 for a = 1:length(conditions{1})
     for b = 1:length(conditions{2})
         for c = 1:length(conditions{3})
@@ -53,10 +53,17 @@ ind_block = slices{a,b,c,d,e}(f).indBlock(1);
 features(cnt).name = slices{a,b,c,d,e}(f).name;
 features(cnt).date = slices{a,b,c,d,e}(f).date;
 features(cnt).slice_num = slices{a,b,c,d,e}(f).slice_num;
+features(cnt).dcs_polarity = b;
+features(cnt).dcs_intensity = d;
 features(cnt).ind_time = slices{a,b,c,d,e}(f).blocktimes(ind_block);
 features(cnt).age = slices{a,b,c,d,e}(f).age;
-features(cnt).hemi = slices{a,b,c,d,e}(f).hemi;
 features(cnt).height = slices{a,b,c,d,e}(f).height;
+if strcmp(slices{a,b,c,d,e}(f).hemi,'l')
+    features(cnt).hemi = 1;
+elseif strcmp(slices{a,b,c,d,e}(f).hemi,'r')
+    features(cnt).hemi = 2;
+end
+
 
 % slopes
 features(cnt).slopes_end = mean(slopes{a,b,c,d,e}(f).slopes_norm(end-9:end));
@@ -69,13 +76,15 @@ features(cnt).drift = drift{a,b,c,d,e}(f).slopes_drift;
 features(cnt).drift_time = drift{a,b,c,d,e}(f).time;
 
 % dcs magnitude
-if length(dcs_magnitude{a,b,c,d,e})>1 && isempty(dcs_magnitude{a,b,c,d,e}(1).slices)==0
-    features(cnt).dcs_magnitude = dcs_magnitude{a,b,c,d,e}(f).dcs_magnitude;
-    % electrode loacation
-    features(cnt).stim_to_soma = electrode_location{a,b,c,d,e}(f).stim_to_soma;
-    features(cnt).stim_to_dend = electrode_location{a,b,c,d,e}(f).stim_to_dend;
+if length(dcs_magnitude{a,b,c,d,e})>1 
+    if isempty(dcs_magnitude{a,b,c,d,e}(f).slices)==0
+        features(cnt).dcs_measured = dcs_magnitude{a,b,c,d,e}(f).dcs_magnitude;
+        % electrode loacation
+        features(cnt).stim_to_soma = electrode_location{a,b,c,d,e}(f).stim_to_soma;
+        features(cnt).stim_to_dend = electrode_location{a,b,c,d,e}(f).stim_to_dend;
+    end
 else
-    features(cnt).dcs_magnitude = [];
+    features(cnt).dcs_measured = [];
     features(cnt).stim_to_soma = [];
     features(cnt).stim_to_dend = [];
 end
@@ -107,7 +116,16 @@ features(cnt).soma_maxslope_i_adapt = soma_maxslope{a,b,c,d,e}(f).maxslope_i_ada
     end
 end
 
-% store all data as single matrix
+%% store all data as single matrix
+feature_names = fieldnames(features);
+feature_cell = cell(length(features),length(feature_names));
+for a = 1:length(features)
+    for b = 1:length(feature_names)
+        feature_cell{a,b} = features(a).(feature_names{b});
+    end
+end
+
+%% figure
 
 % canonical correlation                           
                             
