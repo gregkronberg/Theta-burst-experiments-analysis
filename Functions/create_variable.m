@@ -4,7 +4,7 @@ clear all; close all; clc
 
 %% file paths and global variables
 %==========================================================================
-current_path = pwd;
+current_path = mfilename('fullpath');
 if current_path(1)=='D'
     % desktop paths
     fpath_raw = 'D:\Google Drive\Work\Research Projects\Theta LTP\Raw Matlab Data\'; % raw
@@ -32,8 +32,8 @@ for a = 1:length(conditions{1})
             for d = 1:length(conditions{4})
                 for e = 1:length(conditions{5})
 
-                    dcs_magnitude{a,b,c,d,e}.slices = [];
-                    dcs_magnitude{a,b,c,d,e}.name = 'temp';
+                    slopes{a,b,c,d,e}.slices = [];
+                    slopes{a,b,c,d,e}.name = 'temp';
                     
                 end
             end
@@ -41,6 +41,6 @@ for a = 1:length(conditions{1})
     end
 end
 
-save(strcat(fpath_variables,'dcs_magnitude.mat'),'dcs_magnitude');
+save(strcat(fpath_variables,'slopes.mat'),'slopes');
    
     
