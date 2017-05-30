@@ -284,7 +284,7 @@ for d = 1:length(conditions{4})
         for b = 1:length(conditions{2})
             for c = [1,3];%:length(conditions{3})
                 for e = 1:length(conditions{5})
-                    if isempty(slices{a,b,c,d,e})==0
+                    if isempty(slices{a,b,c,d,e}(keep{a,b,c,d,e}))==0
                         
 plot(abs([slopes{a,b,c,d,e}(keep{a,b,c,d,e}).slopes_base_mean]),slopes_end{a,b,c,d,e},'.','Color',...
     stim_color{b},'MarkerSize',30)
@@ -309,7 +309,7 @@ for d = 1:length(conditions{4})
         for b = 1:length(conditions{2})
             for c = [1,3];%:length(conditions{3})
                 for e = 1:length(conditions{5})
-                    if isempty(slices{a,b,c,d,e})==0
+                    if isempty(slices{a,b,c,d,e}(keep{a,b,c,d,e}))==0
 
 plot(abs([slopes{a,b,c,d,e}(keep{a,b,c,d,e}).spikes_base_mean]),slopes_end{a,b,c,d,e},'.','Color',...
     stim_color{b},'MarkerSize',30)
@@ -333,14 +333,18 @@ for d = 1:length(conditions{4})
             for c = [1,3];%:length(conditions{3})
                 for e = 1:length(conditions{5})
                     if isempty(slices{a,b,c,d,e})==0
+                        if isempty(slices_temp{a,b,c,d,e})==0
 
-plot(abs([slopes{a,b,c,d,e}(keep{a,b,c,d,e}).spikes_slopes_ratio_base]),...
+
+plot(abs([slopes{a,b,c,d,e}(include{a,b,c,d,e}).spikes_slopes_ratio_base]),...
     slopes_end{a,b,c,d,e},'.','Color',...
     stim_color{b},'MarkerSize',30);
 xlabel('Baseline pop spikeamplitude:fEPSP slope ratio')
 ylabel('plasticity')
 title(strcat('TBS with',num2str(conditions{3}(c)),'V/m, ',conditions{4}{d}));
 
+
+                        end
                     end
                 end
             end
