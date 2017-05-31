@@ -164,9 +164,29 @@ save(strcat(fpath_variables,'features.mat'),'features','feature_mat')
 % h = uicontrol('Position',[20 0 400 20],'String','Continue',...
 %               'Callback','uiresume(gcbf)');
 % uiwait(gcf);    
+    
+% % indices of features to include
+% feature_include = logical([gui(:).Value])';
 
-% indices of features to include
-feature_include = logical([gui(:).Value])';
+% code for selecting features
+feature_list = feature_names;%...
+%     {'date';...
+%     'location';...
+%     'dcs_measured';...
+%     'spikes_base_mean';...
+%     'fiber_volley';...
+%     'burst_area_first';...
+%     'burst_area_adapt';...
+%     'soma_maxslope_first';...
+%     'soma_maxslope_adapt';...
+%     'slopes_end'};
+
+feature_include = logical(zeros(length(feature_names),1));
+for a = 1:length(feature_names)
+    if sum(strcmp(feature_list,feature_names{a}))==1
+        feature_include(a) = logical(1);
+    end
+end
 
 % feature matrix
 feature_mat_temp = feature_mat(:,feature_include);
@@ -179,7 +199,7 @@ dcs_i = strcmp(feature_names_temp,'dcs_polarity'); % (features)
 
 loc_feat_i = strcmp(feature_names_temp,'location');
 % index of recording location feature(1 = apical, 2 = basal, 3 = perforant)
-loc_i = feature_mat_temp(:,strcmp(feature_names_temp,'location'))==1; %(features)
+loc_i = feature_mat_temp(:,strcmp(feature_names_temp,'location'))==2; %(features)
 
 % new target variable index
 target_i = strcmp(feature_names_temp,'slopes_end');
@@ -205,7 +225,7 @@ feature_mat_nonans = feature_mat_temp(keep,:);
 figure;hold on
 for a = 1:size(U,1)
     dcs_polarity  = feature_mat_nonans(a,dcs_i);
-    plot(U(a,1),V(a,1),'.','Color',dcs_color{dcs_polarity},'MarkerSize',30)
+    plot(U(a),V(a),'.','Color',dcs_color{dcs_polarity},'MarkerSize',30)
 end
 
 % sort coefficient in ascending order

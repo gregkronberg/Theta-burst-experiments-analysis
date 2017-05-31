@@ -5,7 +5,6 @@
 
 clear all
 close all
-clc
 
 %% file paths and global variables
 %==========================================================================
@@ -18,7 +17,7 @@ if current_path(1)=='D'
     fpath_analysis = 'D:\Google Drive\Work\Research Projects\Theta LTP\Analysis\';% analysis
     fpath_filters = 'D:\Google Drive\Work\Research Projects\Theta LTP\Filters\'; % filters
 else
-    % laptop
+    % laptop paths
     fpath_raw = 'C:\Users\Greg Kronberg\Google Drive\Work\Research Projects\Theta LTP\Raw Matlab Data\'; % raw
     fpath_processed = 'C:\Users\Greg Kronberg\Google Drive\Work\Research Projects\Theta LTP\Processed Matlab Data\'; % processed
     fpath_variables = 'C:\Users\Greg Kronberg\Google Drive\Work\Research Projects\Theta LTP\Matlab Variables\'; % variables
@@ -28,70 +27,93 @@ else
 end
 
 % load global structures
+%---------------------------------
 load(strcat(fpath_variables,'slices.mat')); % slices
 load(strcat(fpath_variables,'slopes.mat')); % slopes
 
 % exclusion criteria
-%==========================================================================
+%----------------------------------
 date_cut = [ 0 0 0];%[20170115 20170301 20170401]; % cutoff dates for [apical basal perforant]
 
-% preallocate
-%==========================================================================
+% time
+%----------------------------------
 tpre = 20;
 tpost = 60;
 t  = 1:tpre+tpost;
+
+% figure parameters
+%----------------------------------
 stim_color = {[0 0 0],[0 0 1],[1 0 0]};
 
 %% store slopes for each condition in matrix
 %==========================================================================
+% loop over experimental conditions
+%--------------------------------
 for a = 1:length(conditions{1})
     for b = 1:length(conditions{2})
         for c = 1:length(conditions{3})
             for d = 1:length(conditions{4})
                 for e = 1:length(conditions{5})                    
-%================================ loop over experimental conditions
-% check for slices
+
+% loop over slices
+%--------------------------------
 if isempty(slices{a,b,c,d,e})==0
     for f = 1:length(slopes{a,b,c,d,e})
-%================================ loop over individual slices
 
 % index for baseline responses
 base_index = slopes{a,b,c,d,e}(f).baseIndex;
 
 % remove noisy samples
-%================================
+%==========================================================================
 % store cleaned traces in new vector
 slopes{a,b,c,d,e}(f).slopes_clean = slopes{a,b,c,d,e}(f).slopes;
+slopes{a,b,c,d,e}(f).spikes_clean = slopes{a,b,c,d,e}(f).spike;
 % window size to compare against neighboring samples
 win = 10; 
 % tolerance for deviation from neighboring samples (in standard deviations)
-std_tol = 2.5;
+std_tol = 2;
+
 % remove pre-induction noise
+%-------------------------------------
+% slopes
 replace = remove_noise(slopes{a,b,c,d,e}(f).slopes_clean(base_index(1:tpre)),win,std_tol);
 slopes{a,b,c,d,e}(f).slopes_clean(base_index(find(replace)))  = slopes{a,b,c,d,e}(f).slopes_clean(base_index(find(replace)-1));
+% spikes
+replace = remove_noise(slopes{a,b,c,d,e}(f).spikes_clean(1:tpre),win,std_tol);
+slopes{a,b,c,d,e}(f).spikes_clean(find(replace))  = slopes{a,b,c,d,e}(f).spikes_clean(find(replace)-1);
 
 % remove post-induction noise
+%--------------------------------------
+% slopes
 replace = remove_noise(slopes{a,b,c,d,e}(f).slopes_clean(base_index(tpre+1:tpre+tpost)),win,std_tol);
 slopes{a,b,c,d,e}(f).slopes_clean(base_index(tpre+find(replace)))  = slopes{a,b,c,d,e}(f).slopes_clean(base_index(tpre+find(replace)-1));
+% spikes
+replace = remove_noise(slopes{a,b,c,d,e}(f).spikes_clean(tpre+1:tpre+tpost),win,std_tol);
+slopes{a,b,c,d,e}(f).spikes_clean(tpre+find(replace))  = slopes{a,b,c,d,e}(f).spikes_clean(tpre+find(replace)-1);
 
-% store normalized slopes as a matrix
-%==================================
+% store normalized slopes
+%---------------------------------------
 slopes{a,b,c,d,e}(f).slopes_base_mean = mean(slopes{a,b,c,d,e}(f).slopes_clean(base_index(1:tpre)));% (scalar)
 slopes{a,b,c,d,e}(f).slopes_norm = slopes{a,b,c,d,e}(f).slopes_clean(base_index)/slopes{a,b,c,d,e}(f).slopes_base_mean; % (blocks)
 slopes{a,b,c,d,e}(f).ind_slopes_norm  = slopes{a,b,c,d,e}(f).indSlopes/slopes{a,b,c,d,e}(f).slopes_base_mean;% (induction pulses)
 
-% store normalized spikes as a matrix
-%==================================
-slopes{a,b,c,d,e}(f).spikes_base_mean = mean(slopes{a,b,c,d,e}(f).spike((1:tpre)));% (scalar)
-slopes{a,b,c,d,e}(f).spikes_norm = slopes{a,b,c,d,e}(f).spike/slopes{a,b,c,d,e}(f).spikes_base_mean; % (blocks)
+% store normalized spikes
+%----------------------------------------
+slopes{a,b,c,d,e}(f).spikes_base_mean = mean(slopes{a,b,c,d,e}(f).spikes_clean((1:tpre)));% (scalar)
+slopes{a,b,c,d,e}(f).spikes_norm = slopes{a,b,c,d,e}(f).spikes_clean/slopes{a,b,c,d,e}(f).spikes_base_mean; % (blocks)
 
-% baseline spike:epsp ratio
-slopes{a,b,c,d,e}(f).spikes_slopes_ratio_base = slopes{a,b,c,d,e}(f).spikes_base_mean/slopes{a,b,c,d,e}(f).slopes_base_mean;
-        
-%===================================== end loop over individual slices
+% normalized baseline spike:epsp ratio
+%----------------------------------------
+slopes{a,b,c,d,e}(f).spikes_slopes_ratio = slopes{a,b,c,d,e}(f).spikes_clean./slopes{a,b,c,d,e}(f).slopes_clean(base_index);
+slopes{a,b,c,d,e}(f).spikes_slopes_ratio_base = mean(slopes{a,b,c,d,e}(f).spikes_slopes_ratio(1:tpre));
+slopes{a,b,c,d,e}(f).spikes_slopes_ratio_norm = slopes{a,b,c,d,e}(f).spikes_slopes_ratio/slopes{a,b,c,d,e}(f).spikes_slopes_ratio_base;
+
+% end loop over individual slices
+%----------------------------------------
     end
 end
-%===================================== end loop over experimental conditions
+% end loop over experimental conditions
+%----------------------------------------
                 end
             end
         end
@@ -137,18 +159,30 @@ slopes{a,b,c,d,e}(f).exp_fit_error = mean(y - slopes{a,b,c,d,e}(f).exp_fit_post)
 
 % reject slices
 %----------------------------------
+
 % slopes{a,b,c,d,e}(f).reject = exp_fit.b > 0 | exp_fit.b < -5e-3;
-slopes{a,b,c,d,e}(f).reject = exp_fit.b > 0 |...
-    lin_fit(1)*90 + lin_fit(2) < 1 &...
+% slopes{a,b,c,d,e}(f).reject = exp_fit.b> 0 |...
+%     lin_fit(1)*90 + lin_fit(2) < 1 &...
+%     [slices{a,b,c,d,e}(f).date]'>date_cut(d);
+
+slopes{a,b,c,d,e}(f).reject = exp_fit.b > -0e-3 |...
+    exp_fit.b < -7e-3  &...
     [slices{a,b,c,d,e}(f).date]'>date_cut(d);
-                        end
-                    end
+
+% end loop over slices
+%----------------------------------
+    end
+end
+% end loop over conditions
+%----------------------------------
                 end
             end
         end
     end
 end
 
+%% save slopes variable
+%==========================================================================
 save(strcat(fpath_variables,'slopes.mat'),'slopes')
 
 %% Stats
@@ -168,7 +202,9 @@ reject = [slopes{a,b,c,d,e}(:).reject]';
 keep{a,b,c,d,e}  = ~reject ;%
 keep_i{a,b,c,d,e} = find(keep{a,b,c,d,e});
 
-% mean and standard error
+if isempty(slices{a,b,c,d,e}(keep{a,b,c,d,e}))==0
+
+% slopes mean and standard error
 %-------------------------------
 slopes_norm_temp = [slopes{a,b,c,d,e}(keep{a,b,c,d,e}).slopes_norm];
 slopes_mean{a,b,c,d,e} = mean(slopes_norm_temp,2);
@@ -179,10 +215,26 @@ slopes_end_mean{a,b,c,d,e} = mean(slopes_end{a,b,c,d,e});
 slopes_end_std{a,b,c,d,e} = std(slopes_end{a,b,c,d,e},0,2);
 slopes_end_sem{a,b,c,d,e} = std(slopes_end{a,b,c,d,e},0,2)/sqrt(length(slopes_end{a,b,c,d,e}));
 
+% spikes ratio mean and standard error
+%-------------------------------
+spikes_ratio_norm_temp = [slopes{a,b,c,d,e}(keep{a,b,c,d,e}).spikes_slopes_ratio_norm];
+spikes_ratio_norm_temp(:,isinf(spikes_ratio_norm_temp(end,:)))=[];
+spikes_ratio_mean{a,b,c,d,e} = mean(spikes_ratio_norm_temp,2);
+spikes_ratio_std{a,b,c,d,e} = std(spikes_ratio_norm_temp,0,2);
+spikes_ratio_sem{a,b,c,d,e} = std(spikes_ratio_norm_temp,0,2)/sqrt(size(spikes_ratio_norm_temp,2));
+spikes_ratio_end{a,b,c,d,e} = mean(spikes_ratio_norm_temp(end-9:end,:),1);
+spikes_ratio_end_mean{a,b,c,d,e} = mean(spikes_ratio_end{a,b,c,d,e});
+spikes_ratio_end_std{a,b,c,d,e} = std(spikes_ratio_end{a,b,c,d,e},0,2);
+spikes_ratio_end_sem{a,b,c,d,e} = std(spikes_ratio_end{a,b,c,d,e},0,2)/sqrt(length(slopes_end{a,b,c,d,e}));
+
 % pairwise comparisons to control (1st parameter of condition b)
 %--------------------------------
+[h,spikes_ratio_p{a,b,c,d,e}] = ttest2(spikes_ratio_end{a,1,1,d,e},spikes_ratio_end{a,b,c,d,e});
 [h,slopes_p{a,b,c,d,e}] = ttest2(slopes_end{a,1,1,d,e},slopes_end{a,b,c,d,e});
-                   
+end
+
+% end loop over conditions
+%--------------------------------
                     end
                 end
             end
@@ -190,7 +242,7 @@ slopes_end_sem{a,b,c,d,e} = std(slopes_end{a,b,c,d,e},0,2)/sqrt(length(slopes_en
     end
 end
 
-%% plot slopes over time
+%% figure: slopes over time
 %==========================================================================
 % loop over conditions
 %--------------------------------
@@ -200,6 +252,7 @@ for a = 1:length(conditions{1})
             for d = 1:length(conditions{4})
                 for e = 1:length(conditions{5})
                     if isempty(slices{a,b,c,d,e})==0
+                        if isempty(slices{a,b,c,d,e}(keep{a,b,c,d,e}))==0
 % figure
 %--------------------------------
 figure;hold on
@@ -218,6 +271,25 @@ ylabel('Normalize fEPSP slope','FontSize',30,'FontWeight','bold')
 title(strcat('TBS with ',conditions{2}{b},', ',num2str(conditions{3}(c)),...
     'V/m, ',conditions{4}{d},', p = ',num2str(slopes_p{a,b,c,d,e})));
 
+% figure
+%--------------------------------
+figure;hold on
+% dcs
+errorbar(t,spikes_ratio_mean{a,b,c,d,e},spikes_ratio_sem{a,b,c,d,e},...
+    '.','Color',stim_color{b},'MarkerSize',30);
+% control
+errorbar(t,spikes_ratio_mean{a,1,1,d,e},spikes_ratio_sem{a,1,1,d,e},...
+    '.','Color',stim_color{1},'MarkerSize',30);
+
+% format figure
+%---------------------------------
+run('figure_format_slopes')
+xlabel('Time (min)','FontSize',30,'FontWeight','bold')
+ylabel('pop spike:epsp slope ratio','FontSize',30,'FontWeight','bold')
+title(strcat('TBS with ',conditions{2}{b},', ',num2str(conditions{3}(c)),...
+    'V/m, ',conditions{4}{d},', p = ',num2str(spikes_ratio_p{a,b,c,d,e})));
+
+                        end
                     end
                 end
             end
@@ -225,7 +297,7 @@ title(strcat('TBS with ',conditions{2}{b},', ',num2str(conditions{3}(c)),...
     end
 end
 
-%% plot final plasticity comparing within each day
+%% figure: final plasticity comparing within each day
 %==========================================================================
 plot_location = [0 -1 1];
 
@@ -238,7 +310,7 @@ for d = 1:length(conditions{4})
             for c = [1,3];%:length(conditions{3})
                 for e = 1:length(conditions{5})
                     if isempty(slices{a,b,c,d,e})==0
-                        if isempty(slices{a,b,c,d,e})==0
+                        if isempty(slices{a,b,c,d,e}(keep{a,b,c,d,e}))==0
 
 % plot final plasticity for each slice
 %----------------------------------
@@ -285,6 +357,7 @@ for d = 1:length(conditions{4})
             for c = [1,3];%:length(conditions{3})
                 for e = 1:length(conditions{5})
                     if isempty(slices{a,b,c,d,e})==0
+                        if isempty(slices{a,b,c,d,e}(keep{a,b,c,d,e}))==0
                         
 plot(abs([slopes{a,b,c,d,e}(keep{a,b,c,d,e}).slopes_base_mean]),slopes_end{a,b,c,d,e},'.','Color',...
     stim_color{b},'MarkerSize',30)
@@ -292,6 +365,7 @@ xlabel('Baseline fEPSP slope')
 ylabel('plasticity')
 title(strcat('TBS with',num2str(conditions{3}(c)),'V/m, ',conditions{4}{d}));
 
+                        end
                     end
                 end
             end
@@ -310,13 +384,16 @@ for d = 1:length(conditions{4})
             for c = [1,3];%:length(conditions{3})
                 for e = 1:length(conditions{5})
                     if isempty(slices{a,b,c,d,e})==0
+                        if isempty(slices{a,b,c,d,e}(keep{a,b,c,d,e}))==0
 
 plot(abs([slopes{a,b,c,d,e}(keep{a,b,c,d,e}).spikes_base_mean]),slopes_end{a,b,c,d,e},'.','Color',...
     stim_color{b},'MarkerSize',30)
+[R,P] = corrcoef([[slopes{a,b,c,d,e}(keep{a,b,c,d,e}).spikes_base_mean]',slopes_end{a,b,c,d,e}']);
 xlabel('Baseline pop spike amplitude')
 ylabel('plasticity')
-title(strcat('TBS with',num2str(conditions{3}(c)),'V/m, ',conditions{4}{d}));
-
+title(strcat('TBS with',num2str(conditions{3}(c)),'V/m, ',conditions{4}{d},...
+    ', R = ',num2str(R(1,2)),'P = ',num2str(P(1,2))));
+                        end
                     end
                 end
             end
@@ -326,6 +403,8 @@ end
 
 %% plasticity as a function of baseline spike/slope ratio
 %==========================================================================
+% loop over conditions
+%--------------------------------
 for d = 1:length(conditions{4})
     figure;hold on
     for a = 1:length(conditions{1})
@@ -333,14 +412,18 @@ for d = 1:length(conditions{4})
             for c = [1,3];%:length(conditions{3})
                 for e = 1:length(conditions{5})
                     if isempty(slices{a,b,c,d,e})==0
+                        if isempty(slices{a,b,c,d,e}(keep{a,b,c,d,e}))==0
 
 plot(abs([slopes{a,b,c,d,e}(keep{a,b,c,d,e}).spikes_slopes_ratio_base]),...
     slopes_end{a,b,c,d,e},'.','Color',...
     stim_color{b},'MarkerSize',30);
+[R,P] = corrcoef([[slopes{a,b,c,d,e}(keep{a,b,c,d,e}).spikes_slopes_ratio_base]',slopes_end{a,b,c,d,e}']);
 xlabel('Baseline pop spikeamplitude:fEPSP slope ratio')
 ylabel('plasticity')
-title(strcat('TBS with',num2str(conditions{3}(c)),'V/m, ',conditions{4}{d}));
+title(strcat('TBS with',num2str(conditions{3}(c)),'V/m, ',conditions{4}{d},...
+    ', R = ',num2str(R(1,2)),'P = ',num2str(P(1,2))));
 
+                        end
                     end
                 end
             end
