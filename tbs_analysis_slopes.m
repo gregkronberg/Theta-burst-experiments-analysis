@@ -33,7 +33,7 @@ load(strcat(fpath_variables,'slopes.mat')); % slopes
 
 % exclusion criteria
 %----------------------------------
-date_cut = [ 0 0 0];%[20170115 20170301 20170401]; % cutoff dates for [apical basal perforant]
+date_cut = [ 0 20170401 0];%[20170115 20170301 20170401]; % cutoff dates for [apical basal perforant]
 
 % time
 %----------------------------------
@@ -43,7 +43,7 @@ t  = 1:tpre+tpost;
 
 % figure parameters
 %----------------------------------
-stim_color = {[0 0 0],[0 0 1],[1 0 0]};
+stim_color = {[0 0 0],[0 .5 1],[1 0 .5]};
 
 %% store slopes for each condition in matrix
 %==========================================================================
@@ -165,9 +165,10 @@ slopes{a,b,c,d,e}(f).exp_fit_error = mean(y - slopes{a,b,c,d,e}(f).exp_fit_post)
 %     lin_fit(1)*90 + lin_fit(2) < 1 &...
 %     [slices{a,b,c,d,e}(f).date]'>date_cut(d);
 
-slopes{a,b,c,d,e}(f).reject = exp_fit.b > -0e-3 |...
-    exp_fit.b < -7e-3  &...
-    [slices{a,b,c,d,e}(f).date]'>date_cut(d);
+slopes{a,b,c,d,e}(f).reject = [slices{a,b,c,d,e}(f).date]'<date_cut(d)|...
+    exp_fit.b > -0e-3 |...
+    exp_fit.b < -8e-3  ...
+    ;
 
 % end loop over slices
 %----------------------------------
@@ -259,6 +260,9 @@ figure;hold on
 % dcs
 errorbar(t,slopes_mean{a,b,c,d,e},slopes_sem{a,b,c,d,e},...
     '.','Color',stim_color{b},'MarkerSize',30);
+
+errorbar(t,slopes_mean{a,2,3,d,e},slopes_sem{a,2,3,d,e},...
+    '.','Color',stim_color{2},'MarkerSize',30);
 % control
 errorbar(t,slopes_mean{a,1,1,d,e},slopes_sem{a,1,1,d,e},...
     '.','Color',stim_color{1},'MarkerSize',30);
@@ -427,6 +431,17 @@ title(strcat('TBS with',num2str(conditions{3}(c)),'V/m, ',conditions{4}{d},...
                     end
                 end
             end
+        end
+    end
+end
+
+%% plot height vs plasticity
+figure;hold on
+for b = 1:length(conditions{2})
+    for c = [1,3];
+        if isempty(slices{1,b,c,2,1}(keep{1,b,c,2,1}))==0
+            plot([slices{1,b,c,2,1}(keep{1,b,c,2,1}).height],...
+                slopes_end{1,b,c,2,1},'.','Color',stim_color{b},'MarkerSize',20)
         end
     end
 end

@@ -12,7 +12,7 @@ clc
 
 %% file paths and global variables
 %==========================================================================
-current_path = pwd;
+current_path = mfilename('fullpath');
 if current_path(1)=='D'
     % desktop paths
     fpath_raw = 'D:\Google Drive\Work\Research Projects\Theta LTP\Raw Matlab Data\'; % raw
@@ -20,6 +20,7 @@ if current_path(1)=='D'
     fpath_variables = 'D:\Google Drive\Work\Research Projects\Theta LTP\Matlab Variables\'; % variables
     fpath_analysis = 'D:\Google Drive\Work\Research Projects\Theta LTP\Analysis\';% analysis
     fpath_filters = 'D:\Google Drive\Work\Research Projects\Theta LTP\Filters\'; % filters
+    fpath_processed_images = 'D:\Google Drive\Work\Research Projects\Theta LTP\Processed Images\'; % processed
 else
     % laptop
     fpath_raw = 'C:\Users\Greg Kronberg\Google Drive\Work\Research Projects\Theta LTP\Raw Matlab Data\'; % raw

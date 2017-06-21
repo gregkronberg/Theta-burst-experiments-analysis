@@ -68,7 +68,7 @@ if isempty(slices{a,b,c,d,e})==0
             plot(t1:t2,baseS(t1:t2,baseIndex(1:tpre))...
                 -ones(length(t1:t2),1)*baseS(t1,baseIndex(1:tpre)));      % plot all pop spikes pre-induction
             title({'Select times of 3 peak times', 'for population spike'})
-            ylim([-.005 .005])
+            ylim([-.002 .003])
             [peakt,peakv] = ginput(3);                                  % select 3 peaks
             spike = zeros(length(baseIndex),1);                 
             for j = 1:20                                               % loop over pre-induction blocks

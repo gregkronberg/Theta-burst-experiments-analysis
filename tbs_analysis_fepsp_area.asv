@@ -94,21 +94,7 @@ end
 end
 save(strcat(fpath_variables,'fepsp_area.mat'),'fepsp_area')
 
-%% plot fepsp area for each condition
+%%
 figure;hold on
-plot(1*ones(length(fepsp_area{1,1,1,2,1}(keep_i{1,1,1,2,1})),1),[fepsp_area{1,1,1,2,1}(keep_i{1,1,1,2,1}).burst_area_mean],'.k','MarkerSize',25)
-plot(2*ones(length(fepsp_area{1,3,3,2,1}(keep_i{1,3,3,2,1})),1),[fepsp_area{1,3,3,2,1}(keep_i{1,3,3,2,1}).burst_area_mean],'.r','MarkerSize',25)
-plot(0*ones(length(fepsp_area{1,2,3,2,1}(keep_i{1,2,3,2,1})),1),[fepsp_area{1,2,3,2,1}(keep_i{1,2,3,2,1}).burst_area_mean],'.b','MarkerSize',25)
-title('mean fepsp area')
-
-figure;hold on
-plot(1*ones(length(fepsp_area{1,1,1,2,1}(keep_i{1,1,1,2,1})),1),[fepsp_area{1,1,1,2,1}(keep_i{1,1,1,2,1}).burst_area_adapt],'.k','MarkerSize',25)
-plot(2*ones(length(fepsp_area{1,3,3,2,1}(keep_i{1,3,3,2,1})),1),[fepsp_area{1,3,3,2,1}(keep_i{1,3,3,2,1}).burst_area_adapt],'.r','MarkerSize',25)
-plot(0*ones(length(fepsp_area{1,2,3,2,1}(keep_i{1,2,3,2,1})),1),[fepsp_area{1,2,3,2,1}(keep_i{1,2,3,2,1}).burst_area_adapt],'.b','MarkerSize',25)
-title('fepsp area adaption (last/first)')
-
-figure;hold on
-plot(1*ones(length(fepsp_area{1,1,1,2,1}(keep_i{1,1,1,2,1})),1),[fepsp_area{1,1,1,2,1}(keep_i{1,1,1,2,1}).burst_area_max],'.k','MarkerSize',25)
-plot(2*ones(length(fepsp_area{1,3,3,2,1}(keep_i{1,3,3,2,1})),1),[fepsp_area{1,3,3,2,1}(keep_i{1,3,3,2,1}).burst_area_max],'.r','MarkerSize',25)
-plot(0*ones(length(fepsp_area{1,2,3,2,1}(keep_i{1,2,3,2,1})),1),[fepsp_area{1,2,3,2,1}(keep_i{1,2,3,2,1}).burst_area_max],'.b','MarkerSize',25)
-title('max fepsp area')
+plot(b*ones(length(fepsp_area{1,1,1,2,1}(keep_i{1,1,1,2,1})),1),[fepsp_area{1,1,1,2,1}(keep_i{1,1,1,2,1}).burst_area_mean],'.k')
+plot(b*ones(length(fepsp_area{1,1,1,2,1}(keep_i{1,1,1,2,1})),1),[fepsp_area{1,1,1,2,1}(keep_i{1,1,1,2,1}).burst_area_mean],'.k')

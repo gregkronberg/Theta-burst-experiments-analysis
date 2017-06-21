@@ -5,7 +5,7 @@ clear all; close all; clc
 %% file paths
 fpathR = 'D:\Google Drive\Work\Research Projects\Theta LTP\Raw Images\';
 fpathP = 'D:\Google Drive\Work\Research Projects\Theta LTP\Processed Images\';
-fpath_variables = 'D:\Google Drive\Work\Research Projects\Theta LTP\Analysis\Processed Variables\'
+fpath_variables = 'D:\Google Drive\Work\Research Projects\Theta LTP\Analysis\Processed Variables\';
 % fpathR = 'C:\Users\Greg Kronberg\Google Drive\Work\Research Projects\Theta LTP\Slice Images\';
 % fpathP = 'C:\Users\Greg Kronberg\Google Drive\Work\Research Projects\Theta LTP\Processed Images\';
 
@@ -25,7 +25,7 @@ for a = 1:size(directP,1);
 end
 
 %% process new slices
-if length(slicesR)~= length(slicesP);                                       % are there new slices?
+% if length(slicesR)~= length(slicesP);                                       % are there new slices?
     for i = 1:length(slicesR);                                              % loop over all slices
         if sum(strcmp(slicesP,strcat(slicesR{i}(1:end-4),'.mat')))==0                              % check if current slice is new
             im = imread(strcat(fpathR,slicesR{i}));
@@ -89,4 +89,4 @@ if length(slicesR)~= length(slicesP);                                       % ar
             save(strcat(fpathP,name,'.mat'))
         end
     end
-end
+% end
